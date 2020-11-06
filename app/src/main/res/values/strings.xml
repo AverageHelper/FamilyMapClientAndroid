@@ -1,8 +1,24 @@
 <resources>
-    <string name="app_name">FamilyMapClient</string>
+    <string name="app_name">Family Map</string>
     <string name="action_settings">Settings</string>
+
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
+
+    <!-- Login -->
+    <string name="login_fragment_label_server_host">Server Host</string>
+    <string name="login_fragment_label_server_port">Server Port</string>
+    <string name="login_fragment_label_username">Username</string>
+    <string name="login_fragment_label_password">Password</string>
+    <string name="login_fragment_label_first_name">First Name</string>
+    <string name="login_fragment_label_last_name">Last Name</string>
+    <string name="login_fragment_label_email_address">Email</string>
+    <string name="login_fragment_label_gender">Gender</string>
+    <string name="login_fragment_label_gender_male">Male</string>
+    <string name="login_fragment_label_gender_female">Female</string>
+    <string name="login_fragment_button_sign_in">Sign In</string>
+    <string name="login_fragment_button_register">Register</string>
+
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
