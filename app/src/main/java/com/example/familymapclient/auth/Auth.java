@@ -2,16 +2,16 @@ package com.example.familymapclient.auth;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-//import model.Gender;
-//import model.User;
+import model.Gender;
+import model.User;
 
 public class Auth {
 	private @Nullable String authToken;
-//	private @Nullable User user;
+	private @Nullable User user;
 	
 	private Auth() {
 		this.authToken = null;
-//		this.user = null;
+		this.user = null;
 	}
 	
 	private static @Nullable Auth _instance = null;
@@ -29,16 +29,16 @@ public class Auth {
 	/**
 	 * @return The signed-in user if the user is signed in. <code>null</code> otherwise.
 	 */
-//	public @Nullable User getUser() {
-//		return user;
-//	}
+	public @Nullable User getUser() {
+		return user;
+	}
 	
 	/**
 	 * @return <code>true</code> if the user is currently logged in.
 	 */
-//	public boolean isSignedIn() {
-//		return user != null;
-//	}
+	public boolean isSignedIn() {
+		return user != null;
+	}
 	
 	/**
 	 * Attempts to get a new auth token from the server.
@@ -49,14 +49,14 @@ public class Auth {
 	 */
 	public void signIn(@NonNull String username, @NonNull String password) throws LoginException {
 		authToken = "logged in lol";
-//		user = new User(
-//			"",
-//			"",
-//			"",
-//			"",
-//			"",
-//			Gender.MALE,
-//			""
-//		);
+		user = new User(
+			"",
+			"",
+			"",
+			"",
+			"",
+			Gender.MALE,
+			""
+		);
 	}
 }
