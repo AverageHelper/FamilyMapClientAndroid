@@ -135,6 +135,15 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 	}
 	
 	
+	/**
+	 * Logs the user out. Forgets the stored auth token and user.
+	 */
+	public void logOut() {
+		authToken = null;
+		setUser(null);
+	}
+	
+	
 	
 	
 	

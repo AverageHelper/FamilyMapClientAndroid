@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import model.Gender;
 
 public class LoginFragment extends Fragment {
@@ -36,11 +36,10 @@ public class LoginFragment extends Fragment {
 	private Button loginButton;
 	private Button registerButton;
 	
-	NavController navController;
-	
 	@Override
 	public View onCreateView(
-		LayoutInflater inflater, ViewGroup container,
+		@NonNull LayoutInflater inflater,
+		ViewGroup container,
 		Bundle savedInstanceState
 	) {
 		// Inflate the layout for this fragment
@@ -50,7 +49,6 @@ public class LoginFragment extends Fragment {
 	public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		
-		navController = Navigation.findNavController(view);
 		setupAuthListeners();
 		findInputFields(view);
 		findButtons(view);
@@ -65,16 +63,21 @@ public class LoginFragment extends Fragment {
 		signedInHandler = auth.addAuthStateDidChangeHandler(user -> {
 			if (user != null) {
 				// Signed in
-				if (this.signedInHandler != null) {
-					this.auth.removeAuthStateDidChangeHandler(this.signedInHandler);
-					this.signedInHandler = null;
-				}
 				this.navigateToSecondFragment();
 			}
 		});
 	}
 	
+	private void prepareForNavigation() {
+		if (signedInHandler != null) {
+			auth.removeAuthStateDidChangeHandler(signedInHandler);
+			signedInHandler = null;
+		}
+	}
+	
 	private void navigateToSecondFragment() {
+		prepareForNavigation();
+		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
 		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
 	}
 	
@@ -95,12 +98,8 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void connectButtons() {
-		loginButton
-			.setOnClickListener(button -> login());
-//			.navigate(R.id.action_FirstFragment_to_SecondFragment));
-		
-		registerButton
-			.setOnClickListener(button -> register());
+		loginButton.setOnClickListener(button -> login());
+		registerButton.setOnClickListener(button -> register());
 	}
 	
 	private @Nullable Gender selectedGender() {
