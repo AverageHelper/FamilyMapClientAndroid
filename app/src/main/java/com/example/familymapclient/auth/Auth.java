@@ -19,17 +19,22 @@ import requests.RegisterRequest;
 
 public class Auth implements OnDataFetched<String> {
 	private @Nullable String authToken;
+	private @Nullable Throwable loginError;
 	private @Nullable User user;
 	private @Nullable TaskRunner runner;
 	private final @NonNull MutableServerLocation location;
-	private final @NonNull Map<Integer, AuthStateDidChangeHandler> authStateDidChangeHandlers;
+	
+	private final @NonNull Map<Integer, NullableValueHandler<User>> authStateDidChangeHandlers;
+	private final @NonNull Map<Integer, NonNullValueHandler<Throwable>> authStateDidFailToChangeHandlers;
 	
 	private Auth() {
 		this.authToken = null;
 		this.user = null;
+		this.loginError = null;
 		this.runner = null;
 		this.location = new MutableServerLocation();
 		this.authStateDidChangeHandlers = new HashMap<>();
+		this.authStateDidFailToChangeHandlers = new HashMap<>();
 	}
 	
 	private static @Nullable Auth _instance = null;
@@ -52,9 +57,24 @@ public class Auth implements OnDataFetched<String> {
 	}
 	
 	private void setUser(@Nullable User user) {
+		this.loginError = null;
+		boolean shouldCallHandlers =
+			(this.user == null && user != null) ||
+			(this.user != null && !this.user.equals(user));
+		
 		this.user = user;
-		for (AuthStateDidChangeHandler h : authStateDidChangeHandlers.values()) {
-			h.didChange(user);
+		if (shouldCallHandlers) {
+			for (NullableValueHandler<User> h : authStateDidChangeHandlers.values()) {
+				h.call(user);
+			}
+		}
+	}
+	
+	private void setLoginError(@NonNull Throwable error) {
+		setUser(null);
+		this.loginError = error;
+		for (NonNullValueHandler<Throwable> h : authStateDidFailToChangeHandlers.values()) {
+			h.call(error);
 		}
 	}
 	
@@ -100,7 +120,7 @@ public class Auth implements OnDataFetched<String> {
 	 * @return A key that identifies the handler to the auth proxy. Pass this value to
 	 * <code>removeAuthStateDidChangeHandler</code> to unregister this handler.
 	 */
-	public int addAuthStateDidChangeHandler(@NonNull AuthStateDidChangeHandler handler) {
+	public int addAuthStateDidChangeHandler(@NonNull NullableValueHandler<User> handler) {
 		int newKey = 0;
 		for (Integer key : authStateDidChangeHandlers.keySet()) {
 			if (newKey <= key) {
@@ -121,6 +141,40 @@ public class Auth implements OnDataFetched<String> {
 		authStateDidChangeHandlers.remove(key);
 	}
 	
+	
+	
+	/**
+	 * Registers a failure handler.
+	 *
+	 * @param handler The handler to call when the auth proxy fails to log in or register a user.
+	 * @return A key that identifies the handler to the auth proxy. Pass this value to
+	 * <code>removeFailureHandler</code> to unregister this handler.
+	 */
+	public int addFailureHandler(@NonNull NonNullValueHandler<Throwable> handler) {
+		int newKey = 0;
+		for (Integer key : authStateDidChangeHandlers.keySet()) {
+			if (newKey <= key) {
+				newKey = key;
+			}
+		}
+		newKey += 1;
+		
+		authStateDidFailToChangeHandlers.put(newKey, handler);
+		return newKey;
+	}
+	
+	/**
+	 * Unregisters a failure handler. Does nothing if there is no registered handler for the given key.
+	 * @param key The handler key.
+	 */
+	public void removeFailureHandler(int key) {
+		authStateDidFailToChangeHandlers.remove(key);
+	}
+	
+	
+	
+	
+	
 	/**
 	 * Attempts to get a new auth token from the server.
 	 *
@@ -129,17 +183,6 @@ public class Auth implements OnDataFetched<String> {
 	 * @throws LoginException An exception if there was some problem logging in.
 	 */
 	public void signIn(@NonNull String username, @NonNull String password) throws LoginException {
-//		authToken = "logged in lol";
-//		setUser(new User(
-//			"",
-//			"",
-//			"",
-//			"",
-//			"",
-//			Gender.MALE,
-//			null
-//		));
-		
 		LoginRequest req = new LoginRequest(
 			username,
 			password
@@ -165,6 +208,18 @@ public class Auth implements OnDataFetched<String> {
 	
 	
 	
+	
+	/**
+	 * Attempts to register a new user with the provided details.
+	 *
+	 * @param username The unique identifier of the new user.
+	 * @param password The user's password.
+	 * @param email The user's email address.
+	 * @param firstName The user's first name.
+	 * @param lastName The user's last name.
+	 * @param gender The user's gender.
+	 * @throws RegisterException if there was a problem with the provided inputs.
+	 */
 	public void register(
 		@NonNull String username,
 		@NonNull String password,
@@ -213,27 +268,28 @@ public class Auth implements OnDataFetched<String> {
 	
 	
 	
+	
+	// ** Login Callbacks
+	
 	public void taskWillBeginRunning(@NonNull LoginRequestTask task) {
-		System.out.println("Log In: taskWillBeginRunning " + task.toString());
 		// Tell fragments to update (we're loading, so clients should read that)
 	}
 	
 	public void taskDidFinishRunning(@NonNull LoginRequestTask task, @NonNull String result) {
 		System.out.println("Log In: taskDidFinishRunning " + result);
 		// Parse the result
-		// Set our logged-in state, or store an error message
-		// Tell fragments to update
-		
-		this.runner = null;
+		// Set our logged-in state
 	}
 	
 	public void taskDidFail(@NonNull LoginRequestTask task, @NonNull Throwable error) {
 		System.out.println("Log In: taskDidFail " + error);
-		// Tell fragments to display the result
-		this.runner = null;
+		setLoginError(error);
 	}
 	
 	
+	
+	
+	// ** Register Callbacks
 	
 	public void taskWillBeginRunning(@NonNull RegisterRequestTask task) {
 		System.out.println("Register: taskWillBeginRunning " + task.toString());
@@ -243,20 +299,18 @@ public class Auth implements OnDataFetched<String> {
 	public void taskDidFinishRunning(@NonNull RegisterRequestTask task, @NonNull String result) {
 		System.out.println("Register: taskDidFinishRunning " + result);
 		// Parse the result
-		// Set our logged-in state, or store an error message
-		// Tell fragments to update
-		
-		this.runner = null;
+		// Set our logged-in state
 	}
 	
 	public void taskDidFail(@NonNull RegisterRequestTask task, @NonNull Throwable error) {
 		System.out.println("Register: taskDidFail " + error);
-		// Tell fragments to display the result
-		this.runner = null;
+		setLoginError(error);
 	}
 	
 	
 	
+	
+	// ** Async Callback Dispatchers
 	
 	@Override
 	public <Task extends RequestTask<?>> void taskWillBeginRunning(@NonNull Task task) {
@@ -273,6 +327,8 @@ public class Auth implements OnDataFetched<String> {
 	
 	@Override
 	public <Task extends RequestTask<?>> void taskDidFinishRunning(@NonNull Task task, @NonNull String result) {
+		this.runner = null;
+		
 		if (task instanceof LoginRequestTask) {
 			taskDidFinishRunning((LoginRequestTask) task, result);
 			
@@ -286,6 +342,8 @@ public class Auth implements OnDataFetched<String> {
 	
 	@Override
 	public <Task extends RequestTask<?>> void taskDidFail(@NonNull Task task, @NonNull Throwable error) {
+		this.runner = null;
+		
 		if (task instanceof LoginRequestTask) {
 			taskDidFail((LoginRequestTask) task, error);
 			

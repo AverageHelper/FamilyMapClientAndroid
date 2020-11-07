@@ -12,6 +12,7 @@ import android.widget.RadioGroup;
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.auth.LoginException;
 import com.example.familymapclient.auth.RegisterException;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Locale;
 
@@ -26,6 +27,7 @@ public class LoginFragment extends Fragment {
 	
 	public Auth auth = Auth.shared();
 	@Nullable Integer signedInHandler = null;
+	@Nullable Integer loginFailureHandler = null;
 	
 	private EditText hostField;
 	private EditText portField;
@@ -71,6 +73,9 @@ public class LoginFragment extends Fragment {
 				this.navigateToSecondFragment();
 			}
 		});
+		loginFailureHandler = auth.addFailureHandler(error -> {
+			this.presentMessage(error.toString());
+		});
 	}
 	
 	private void prepareForNavigation() {
@@ -78,12 +83,23 @@ public class LoginFragment extends Fragment {
 			auth.removeAuthStateDidChangeHandler(signedInHandler);
 			signedInHandler = null;
 		}
+		if (loginFailureHandler != null) {
+			auth.removeFailureHandler(loginFailureHandler);
+			loginFailureHandler = null;
+		}
 	}
 	
 	private void navigateToSecondFragment() {
 		prepareForNavigation();
 		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
 		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
+	}
+	
+	private void presentMessage(@NonNull String text) {
+		View view = getView();
+		if (view != null) {
+			Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Tapped Error", null).show();
+		}
 	}
 	
 	private void findInputFields(@NonNull View view) {
