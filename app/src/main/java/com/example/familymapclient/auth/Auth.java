@@ -269,6 +269,7 @@ public class Auth implements OnDataFetched<String> {
 	
 	
 	
+	
 	// ** Login Callbacks
 	
 	public void taskWillBeginRunning(@NonNull LoginRequestTask task) {
@@ -279,6 +280,8 @@ public class Auth implements OnDataFetched<String> {
 		System.out.println("Log In: taskDidFinishRunning " + result);
 		// Parse the result
 		// Set our logged-in state
+		
+		setLoginError(new Exception(result));
 	}
 	
 	public void taskDidFail(@NonNull LoginRequestTask task, @NonNull Throwable error) {
@@ -300,6 +303,8 @@ public class Auth implements OnDataFetched<String> {
 		System.out.println("Register: taskDidFinishRunning " + result);
 		// Parse the result
 		// Set our logged-in state
+		
+		setLoginError(new Exception(result));
 	}
 	
 	public void taskDidFail(@NonNull RegisterRequestTask task, @NonNull Throwable error) {

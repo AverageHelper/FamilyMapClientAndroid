@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -52,7 +53,7 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 	
 	
 	@Override
-	public @NonNull String call() throws IOException {
+	public @NonNull String call() throws IOException, RequestFailureException {
 		// send the request to the server
 		URL url = location.getURL(path);
 		
@@ -61,11 +62,25 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 		http.setRequestMethod(httpMethod());
 		http.setDoOutput(req != null); // false if there is no request body
 		
-		http.addRequestProperty("Authorization", "auth_token");
-		http.addRequestProperty("Accept", "application/json");
+//		http.addRequestProperty("Authorization", "auth_token");
+		if (req == null) {
+			http.addRequestProperty("Accept", "application/json");
+		} else {
+			http.addRequestProperty("Content-Type", "application/json");
+		}
 		
 		System.out.println("Attempting to connect to " + url.toString());
 		http.connect();
+		
+		
+		if (req != null) {
+			// Send the request payload
+			String reqData = req.serialize();
+			OutputStream reqBody = http.getOutputStream();
+			writeString(reqData, reqBody);
+			reqBody.close();
+		}
+		
 		if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
 			// Success
 			InputStream respBody = http.getInputStream();
@@ -73,7 +88,7 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 			
 		} else {
 			// Fail
-			return http.getResponseMessage();
+			throw new RequestFailureException(http.getResponseMessage());
 		}
 	}
 	
@@ -93,5 +108,9 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 		}
 		httpInput.close();
 		return in.toString();
+	}
+	
+	private void writeString(@NonNull String text, @NonNull OutputStream stream) throws IOException {
+		stream.write(text.getBytes());
 	}
 }

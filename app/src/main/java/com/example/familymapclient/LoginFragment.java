@@ -74,7 +74,17 @@ public class LoginFragment extends Fragment {
 			}
 		});
 		loginFailureHandler = auth.addFailureHandler(error -> {
-			this.presentMessage(error.toString());
+			if (error instanceof Exception) {
+				Exception e = (Exception) error;
+				if (e.getMessage() != null) {
+					this.presentMessage(e.getMessage());
+				} else {
+					this.presentMessage(e.toString());
+				}
+				
+			} else {
+				this.presentMessage(error.toString());
+			}
 		});
 	}
 	
