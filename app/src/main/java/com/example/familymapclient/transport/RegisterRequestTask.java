@@ -12,15 +12,22 @@ import requests.RegisterRequest;
 public class RegisterRequestTask extends RequestTask<RegisterRequest> {
 	private static final String REGISTER_PATH = "/user/register";
 	
-	private final @Nullable OnDataFetched<String> listener;
+	private final @Nullable OnDataFetched<String, RegisterRequestTask> listener;
 	
 	public RegisterRequestTask(
-		@NonNull String serverHostName,
-		int serverPortNumber,
+		@NonNull MutableServerLocation location,
 		@Nullable RegisterRequest req,
-		@Nullable OnDataFetched<String> listener
+		@Nullable OnDataFetched<String, RegisterRequestTask> listener
 	) {
-		super(serverHostName, serverPortNumber, REGISTER_PATH, req);
+		this(new ServerLocation(location), req, listener);
+	}
+	
+	public RegisterRequestTask(
+		@NonNull ServerLocation location,
+		@Nullable RegisterRequest req,
+		@Nullable OnDataFetched<String, RegisterRequestTask> listener
+	) {
+		super(location, REGISTER_PATH, req);
 		this.listener = listener;
 	}
 	
@@ -33,7 +40,7 @@ public class RegisterRequestTask extends RequestTask<RegisterRequest> {
 	@Override
 	public void willBeginRunning() {
 		if (listener != null) {
-			listener.taskWillBeginRunning();
+			listener.taskWillBeginRunning(this);
 		}
 	}
 	
@@ -41,7 +48,7 @@ public class RegisterRequestTask extends RequestTask<RegisterRequest> {
 	@Override
 	public void didFinishRunning(@NonNull String result) {
 		if (listener != null) {
-			listener.taskDidFinishRunning(result);
+			listener.taskDidFinishRunning(this, result);
 		}
 	}
 }

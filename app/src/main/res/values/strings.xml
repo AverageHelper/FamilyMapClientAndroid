@@ -2,8 +2,8 @@
     <string name="app_name">Family Map</string>
     <string name="action_settings">Settings</string>
 
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
+    <!-- Navigation Labels -->
+    <string name="login_fragment_label">Login</string>
 
     <!-- Login -->
     <string name="login_fragment_label_server_host">Server Host</string>

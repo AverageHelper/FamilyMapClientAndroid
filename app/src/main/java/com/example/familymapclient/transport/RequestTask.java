@@ -20,25 +20,22 @@ import transport.JSONSerialization;
  * @param <Request> The type of request object to send.
  */
 public abstract class RequestTask<Request extends JSONSerialization> implements CustomCallable<String> {
-	private final @NonNull String serverHostName;
-	private final int serverPortNumber;
+	private final @NonNull ServerLocation location;
 	private final @Nullable Request req;
 	private final @NonNull String path;
 	
 	public RequestTask(
-		@NonNull String serverHostName,
-		int serverPortNumber,
+		@NonNull ServerLocation location,
 		@Nullable String path,
 		@Nullable Request req
 	) {
-		this.serverHostName = serverHostName;
-		this.serverPortNumber = serverPortNumber;
+		this.location = location;
+		this.req = req;
 		if (path == null) {
 			this.path = "/";
 		} else {
 			this.path = path;
 		}
-		this.req = req;
 	}
 	
 	
@@ -57,9 +54,9 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 	@Override
 	public @NonNull String call() throws IOException {
 		// send the request to the server
-		URL mUrl = new URL("http://" + serverHostName + ":" + serverPortNumber + path);
+		URL url = location.getURL(path);
 		
-		HttpURLConnection http = (HttpURLConnection) mUrl.openConnection();
+		HttpURLConnection http = (HttpURLConnection) url.openConnection();
 		
 		http.setRequestMethod(httpMethod());
 		http.setDoOutput(req != null); // false if there is no request body

@@ -18,13 +18,9 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 	
-	private Auth auth;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		setup();
 		
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = findViewById(R.id.toolbar);
@@ -34,10 +30,6 @@ public class MainActivity extends AppCompatActivity {
 		fab
 			.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 			.setAction("Action", null).show());
-	}
-	
-	private void setup() {
-		auth = Auth.shared();
 	}
 	
 	@Override
