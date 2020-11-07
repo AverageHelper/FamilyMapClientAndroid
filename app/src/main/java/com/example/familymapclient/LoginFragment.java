@@ -169,7 +169,7 @@ public class LoginFragment extends Fragment {
 			
 			auth.signIn(username, password);
 		} catch (LoginException e) {
-			// TODO: Log and display the error message
+			presentMessage(e.getReason().getMessage());
 		}
 	}
 	
@@ -185,7 +185,7 @@ public class LoginFragment extends Fragment {
 			
 			auth.register(username, password, email, firstName, lastName, selectedGender());
 		} catch (RegisterException e) {
-			// TODO: Log and display the error message
+			presentMessage(e.getReason().getMessage());
 		}
 	}
 	

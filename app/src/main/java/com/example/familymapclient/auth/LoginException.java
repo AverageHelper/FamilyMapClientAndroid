@@ -1,19 +1,21 @@
 package com.example.familymapclient.auth;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 public class LoginException extends Exception {
-	public LoginException() {
-		super();
+	private final @NonNull LoginFailureReason reason;
+	
+	public LoginException(@NonNull LoginFailureReason reason) {
+		this(reason, null);
 	}
 	
-	public LoginException(String message) {
-		super(message);
+	public LoginException(@NonNull LoginFailureReason reason, @Nullable Exception e) {
+		super(reason.getMessage(), e);
+		this.reason = reason;
 	}
 	
-	public LoginException(Exception e) {
-		super(e);
-	}
-	
-	public LoginException(String message, Exception e) {
-		super(message, e);
+	public @NonNull LoginFailureReason getReason() {
+		return reason;
 	}
 }

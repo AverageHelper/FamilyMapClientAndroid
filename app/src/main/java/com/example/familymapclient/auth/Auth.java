@@ -183,6 +183,13 @@ public class Auth implements OnDataFetched<String> {
 	 * @throws LoginException An exception if there was some problem logging in.
 	 */
 	public void signIn(@NonNull String username, @NonNull String password) throws LoginException {
+		if (username.isEmpty()) {
+			throw new LoginException(LoginFailureReason.MISSING_USERNAME);
+		}
+		if (password.isEmpty()) {
+			throw new LoginException(LoginFailureReason.MISSING_PASSWORD);
+		}
+		
 		LoginRequest req = new LoginRequest(
 			username,
 			password

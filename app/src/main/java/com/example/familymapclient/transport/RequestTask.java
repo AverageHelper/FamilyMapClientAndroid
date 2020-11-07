@@ -88,7 +88,13 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 			
 		} else {
 			// Fail
-			throw new RequestFailureException(http.getResponseMessage());
+			InputStream respBody = http.getErrorStream();
+			String message = readString(respBody);
+			if (message.isEmpty()) {
+				message = http.getResponseMessage();
+			}
+			
+			throw RequestFailureException.fromServerResponse(message);
 		}
 	}
 	
