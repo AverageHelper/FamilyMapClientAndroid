@@ -6,9 +6,11 @@ import com.example.familymapclient.auth.Auth;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.PersistableBundle;
 import android.view.View;
 
 import android.view.Menu;
@@ -58,5 +60,11 @@ public class MainActivity extends AppCompatActivity {
 		}
 		
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
+		super.onSaveInstanceState(outState, outPersistentState);
+		// TODO: Save auth state... ?
 	}
 }

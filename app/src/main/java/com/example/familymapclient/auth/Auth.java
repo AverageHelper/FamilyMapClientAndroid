@@ -1,17 +1,25 @@
 package com.example.familymapclient.auth;
 
+import com.example.familymapclient.async.TaskRunner;
+import com.example.familymapclient.transport.OnDataFetched;
+import com.example.familymapclient.transport.RegisterRequestTask;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import model.Gender;
 import model.User;
+import requests.LoginRequest;
+import requests.RegisterRequest;
 
-public class Auth {
+public class Auth implements OnDataFetched<String> {
 	private @Nullable String authToken;
 	private @Nullable User user;
+	private @Nullable TaskRunner runner;
 	
 	private Auth() {
 		this.authToken = null;
 		this.user = null;
+		this.runner = null;
 	}
 	
 	private static @Nullable Auth _instance = null;
@@ -40,6 +48,10 @@ public class Auth {
 		return user != null;
 	}
 	
+	public boolean isRunning() {
+		return runner != null;
+	}
+	
 	/**
 	 * Attempts to get a new auth token from the server.
 	 *
@@ -56,7 +68,78 @@ public class Auth {
 			"",
 			"",
 			Gender.MALE,
-			""
+			null
 		);
+		
+		LoginRequest req = new LoginRequest(
+			username,
+			password
+		);
+		
+		// Send the request
+	}
+	
+	public void register(
+		@NonNull String username,
+		@NonNull String password,
+		@NonNull String email,
+		@NonNull String firstName,
+		@NonNull String lastName,
+		@NonNull Gender gender
+	) throws RegisterException {
+		// TODO: Check that none of the passed fields were empty.
+//		if (username.isEmpty()) {
+//			throw new RegisterException(RegisterFailureReason.MISSING_USERNAME);
+//		}
+//		if (password.isEmpty()) {
+//			throw new RegisterException(RegisterFailureReason.MISSING_PASSWORD);
+//		}
+//		if (email.isEmpty()) {
+//			throw new RegisterException(RegisterFailureReason.MISSING_EMAIL);
+//		}
+//		if (firstName.isEmpty()) {
+//			throw new RegisterException(RegisterFailureReason.MISSING_FIRST_NAME);
+//		}
+//		if (lastName.isEmpty()) {
+//			throw new RegisterException(RegisterFailureReason.MISSING_LAST_NAME);
+//		}
+		
+		RegisterRequest req = new RegisterRequest(
+			username,
+			password,
+			email,
+			firstName,
+			lastName,
+			gender
+		);
+		
+		// Send the request
+		RegisterRequestTask task = new RegisterRequestTask(
+			"localhost",
+			8080,
+			req,
+			this
+		);
+		runner = new TaskRunner();
+		runner.executeAsync(task);
+	}
+	
+	
+	
+	@Override
+	public void taskWillBeginRunning() {
+		// Tell fragments to update (we're loading, so clients should read that)
+	}
+	
+	
+	
+	@Override
+	public void taskDidFinishRunning(@NonNull String result) {
+		// Determine whether this was a login or result
+		// Parse the result
+		// Set our logged-in state, or store an error message
+		// Tell fragments to update
+		
+		this.runner = null;
 	}
 }
