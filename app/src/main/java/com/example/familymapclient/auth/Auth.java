@@ -1,9 +1,11 @@
 package com.example.familymapclient.auth;
 
 import com.example.familymapclient.async.TaskRunner;
+import com.example.familymapclient.transport.LoginRequestTask;
 import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RegisterRequestTask;
+import com.example.familymapclient.transport.RequestTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +17,7 @@ import model.User;
 import requests.LoginRequest;
 import requests.RegisterRequest;
 
-public class Auth implements OnDataFetched<String, RegisterRequestTask> {
+public class Auth implements OnDataFetched<String> {
 	private @Nullable String authToken;
 	private @Nullable User user;
 	private @Nullable TaskRunner runner;
@@ -79,6 +81,18 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 		location.setUsesSecureProtocol(usesSecureProtocol);
 	}
 	
+	public @Nullable String getHostname() {
+		return location.getHostname();
+	}
+	
+	public @Nullable Integer getPortNumber() {
+		return location.getPortNumber();
+	}
+	
+	public boolean usesSecureProtocol() {
+		return location.usesSecureProtocol();
+	}
+	
 	/**
 	 * Registers an auth-state handler.
 	 *
@@ -115,16 +129,16 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 	 * @throws LoginException An exception if there was some problem logging in.
 	 */
 	public void signIn(@NonNull String username, @NonNull String password) throws LoginException {
-		authToken = "logged in lol";
-		setUser(new User(
-			"",
-			"",
-			"",
-			"",
-			"",
-			Gender.MALE,
-			null
-		));
+//		authToken = "logged in lol";
+//		setUser(new User(
+//			"",
+//			"",
+//			"",
+//			"",
+//			"",
+//			Gender.MALE,
+//			null
+//		));
 		
 		LoginRequest req = new LoginRequest(
 			username,
@@ -132,6 +146,9 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 		);
 		
 		// Send the request
+		LoginRequestTask task = new LoginRequestTask(location, req, this);
+		runner = new TaskRunner();
+		runner.executeAsync(task);
 	}
 	
 	
@@ -154,7 +171,7 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 		@NonNull String email,
 		@NonNull String firstName,
 		@NonNull String lastName,
-		@NonNull Gender gender
+		@Nullable Gender gender
 	) throws RegisterException {
 		if (username.isEmpty()) {
 			throw new RegisterException(RegisterFailureReason.MISSING_USERNAME);
@@ -170,6 +187,9 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 		}
 		if (lastName.isEmpty()) {
 			throw new RegisterException(RegisterFailureReason.MISSING_LAST_NAME);
+		}
+		if (gender == null) {
+			throw new RegisterException(RegisterFailureReason.MISSING_GENDER);
 		}
 		
 		RegisterRequest req = new RegisterRequest(
@@ -191,18 +211,89 @@ public class Auth implements OnDataFetched<String, RegisterRequestTask> {
 		runner.executeAsync(task);
 	}
 	
-	@Override
-	public void taskWillBeginRunning(@NonNull RegisterRequestTask task) {
+	
+	
+	public void taskWillBeginRunning(@NonNull LoginRequestTask task) {
+		System.out.println("Log In: taskWillBeginRunning " + task.toString());
 		// Tell fragments to update (we're loading, so clients should read that)
 	}
 	
-	@Override
-	public void taskDidFinishRunning(@NonNull RegisterRequestTask task, @NonNull String result) {
-		// Determine whether this was a login or result
+	public void taskDidFinishRunning(@NonNull LoginRequestTask task, @NonNull String result) {
+		System.out.println("Log In: taskDidFinishRunning " + result);
 		// Parse the result
 		// Set our logged-in state, or store an error message
 		// Tell fragments to update
 		
 		this.runner = null;
+	}
+	
+	public void taskDidFail(@NonNull LoginRequestTask task, @NonNull Throwable error) {
+		System.out.println("Log In: taskDidFail " + error);
+		// Tell fragments to display the result
+		this.runner = null;
+	}
+	
+	
+	
+	public void taskWillBeginRunning(@NonNull RegisterRequestTask task) {
+		System.out.println("Register: taskWillBeginRunning " + task.toString());
+		// Tell fragments to update (we're loading, so clients should read that)
+	}
+	
+	public void taskDidFinishRunning(@NonNull RegisterRequestTask task, @NonNull String result) {
+		System.out.println("Register: taskDidFinishRunning " + result);
+		// Parse the result
+		// Set our logged-in state, or store an error message
+		// Tell fragments to update
+		
+		this.runner = null;
+	}
+	
+	public void taskDidFail(@NonNull RegisterRequestTask task, @NonNull Throwable error) {
+		System.out.println("Register: taskDidFail " + error);
+		// Tell fragments to display the result
+		this.runner = null;
+	}
+	
+	
+	
+	
+	@Override
+	public <Task extends RequestTask<?>> void taskWillBeginRunning(@NonNull Task task) {
+		if (task instanceof LoginRequestTask) {
+			taskWillBeginRunning((LoginRequestTask) task);
+			
+		} else if (task instanceof RegisterRequestTask) {
+			taskWillBeginRunning((RegisterRequestTask) task);
+			
+		} else {
+			System.out.println("taskWillBeginRunning called with unknown task: " + task.toString());
+		}
+	}
+	
+	@Override
+	public <Task extends RequestTask<?>> void taskDidFinishRunning(@NonNull Task task, @NonNull String result) {
+		if (task instanceof LoginRequestTask) {
+			taskDidFinishRunning((LoginRequestTask) task, result);
+			
+		} else if (task instanceof RegisterRequestTask) {
+			taskDidFinishRunning((RegisterRequestTask) task, result);
+			
+		} else {
+			System.out.println("taskDidFinishRunning called with unknown task: " + task.toString());
+		}
+	}
+	
+	@Override
+	public <Task extends RequestTask<?>> void taskDidFail(@NonNull Task task, @NonNull Throwable error) {
+		if (task instanceof LoginRequestTask) {
+			taskDidFail((LoginRequestTask) task, error);
+			
+		} else if (task instanceof RegisterRequestTask) {
+			taskDidFail((RegisterRequestTask) task, error);
+			
+		} else {
+			System.out.println("taskDidFail called with unknown task: " + task.toString());
+		}
 	}
 }

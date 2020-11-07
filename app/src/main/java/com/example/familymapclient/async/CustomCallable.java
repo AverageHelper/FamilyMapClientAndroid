@@ -6,13 +6,19 @@ import androidx.annotation.NonNull;
 
 public interface CustomCallable<R> extends Callable<R> {
 	/**
-	 * Called by the <code>TaskRunner</code> before asynchronous tasks begin running.
+	 * Called by the <code>TaskRunner</code> on the main thread before asynchronous tasks begin running.
 	 */
-	default void willBeginRunning() {}
+	void willBeginRunning();
 	
 	/**
-	 * Called by the <code>TaskRunner</code> after asynchronous tasks finish running.
+	 * Called by the <code>TaskRunner</code> on the main thread after asynchronous tasks finish running.
 	 * @param result The result of the call;
 	 */
-	default void didFinishRunning(@NonNull R result) {}
+	void didFinishRunning(@NonNull R result);
+	
+	/**
+	 * Called by the <code>TaskRunner</code> on the main thread if the asynchronous tasks failed.
+	 * @param error The object that was thrown.
+	 */
+	void didFail(@NonNull Throwable error);
 }

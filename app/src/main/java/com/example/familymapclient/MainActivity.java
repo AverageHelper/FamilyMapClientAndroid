@@ -11,12 +11,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.os.PersistableBundle;
-
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
+	
+	public static final String KEY_SERVER_HOST_NAME = "KEY_SERVER_HOST_NAME";
+	public static final String KEY_SERVER_PORT = "KEY_SERVER_PORT";
+	public static final String KEY_SERVER_USES_HTTPS = "KEY_SERVER_USES_HTTPS";
 	
 	public Auth auth = Auth.shared();
 	@Nullable Integer authStateHandler = null;
@@ -26,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		restoreModelState(savedInstanceState);
 		
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = findViewById(R.id.toolbar);
@@ -66,9 +70,9 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	@Override
-	public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-		super.onSaveInstanceState(outState, outPersistentState);
-		// TODO: Save auth state... ?
+	protected void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+		saveModelState(outState);
 	}
 	
 	@Override
@@ -77,6 +81,41 @@ public class MainActivity extends AppCompatActivity {
 		if (authStateHandler != null) {
 			auth.removeAuthStateDidChangeHandler(authStateHandler);
 			authStateHandler = null;
+		}
+	}
+	
+	
+	
+	private void saveModelState(@NonNull Bundle outState) {
+		// Save server location
+		if (auth.getHostname() != null) {
+			outState.putString(KEY_SERVER_HOST_NAME, auth.getHostname());
+		} else {
+			outState.remove(KEY_SERVER_HOST_NAME);
+		}
+		
+		if (auth.getPortNumber() != null) {
+			outState.putInt(KEY_SERVER_PORT, auth.getPortNumber());
+		} else {
+			outState.remove(KEY_SERVER_PORT);
+		}
+		
+		outState.putBoolean(KEY_SERVER_USES_HTTPS, auth.usesSecureProtocol());
+		
+		// TODO: Save auth state... ?
+	}
+	
+	private void restoreModelState(@Nullable Bundle savedInstanceState) {
+		if (savedInstanceState == null) {
+			return;
+		}
+		
+		// Restore server location
+		auth.setUsesSecureProtocol(savedInstanceState.getBoolean(KEY_SERVER_USES_HTTPS));
+		auth.setHostname(savedInstanceState.getString(KEY_SERVER_HOST_NAME));
+		
+		if (savedInstanceState.containsKey(KEY_SERVER_PORT)) {
+			auth.setPortNumber(savedInstanceState.getInt(KEY_SERVER_HOST_NAME));
 		}
 	}
 	

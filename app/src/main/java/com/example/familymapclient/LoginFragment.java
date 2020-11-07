@@ -5,12 +5,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.auth.LoginException;
 import com.example.familymapclient.auth.RegisterException;
+
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +29,7 @@ public class LoginFragment extends Fragment {
 	
 	private EditText hostField;
 	private EditText portField;
+	private CheckBox prefersHTTPS;
 	private EditText usernameField;
 	private EditText passwordField;
 	private EditText firstNameField;
@@ -51,6 +55,7 @@ public class LoginFragment extends Fragment {
 		
 		setupAuthListeners();
 		findInputFields(view);
+		prefillInputFields();
 		findButtons(view);
 		connectButtons();
 		
@@ -84,12 +89,23 @@ public class LoginFragment extends Fragment {
 	private void findInputFields(@NonNull View view) {
 		hostField = view.findViewById(R.id.input_server_host);
 		portField = view.findViewById(R.id.input_server_port);
+		prefersHTTPS = view.findViewById(R.id.input_uses_https);
 		usernameField = view.findViewById(R.id.input_username);
 		passwordField = view.findViewById(R.id.input_password);
 		firstNameField = view.findViewById(R.id.input_first_name);
 		lastNameField = view.findViewById(R.id.input_last_name);
 		emailField = view.findViewById(R.id.input_email_address);
 		genderField = view.findViewById(R.id.input_gender);
+	}
+	
+	private void prefillInputFields() {
+		if (auth.getHostname() != null) {
+			hostField.setText(auth.getHostname());
+		}
+		if (auth.getPortNumber() != null) {
+			portField.setText(String.format(Locale.getDefault(), "%1d", auth.getPortNumber()));
+		}
+		prefersHTTPS.setChecked(auth.usesSecureProtocol());
 	}
 	
 	private void findButtons(@NonNull View view) {
@@ -114,10 +130,17 @@ public class LoginFragment extends Fragment {
 		return null;
 	}
 	
+	
+	
+	// ** Actions
+	
 	private void login() {
 		try {
 			String username = usernameField.getText().toString();
 			String password = passwordField.getText().toString();
+			
+			updateServerLocation();
+			
 			auth.signIn(username, password);
 		} catch (LoginException e) {
 			// TODO: Log and display the error message
@@ -131,9 +154,29 @@ public class LoginFragment extends Fragment {
 			String email = emailField.getText().toString();
 			String firstName = firstNameField.getText().toString();
 			String lastName = lastNameField.getText().toString();
+			
+			updateServerLocation();
+			
 			auth.register(username, password, email, firstName, lastName, selectedGender());
 		} catch (RegisterException e) {
 			// TODO: Log and display the error message
+		}
+	}
+	
+	
+	private void updateServerLocation() {
+		auth.setUsesSecureProtocol(prefersHTTPS.isChecked());
+		
+		if (hostField.getText().toString().isEmpty()) {
+			auth.setHostname(null);
+		} else {
+			auth.setHostname(hostField.getText().toString());
+		}
+		
+		if (portField.getText().toString().isEmpty()) {
+			auth.setPortNumber(null);
+		} else {
+			auth.setPortNumber(Integer.parseInt(portField.getText().toString()));
 		}
 	}
 }

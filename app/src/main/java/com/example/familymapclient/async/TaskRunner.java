@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * @see "https://medium.com/swlh/asynctask-is-deprecated-now-what-f30c31362761"
@@ -38,25 +39,38 @@ public class TaskRunner {
 		public void run() {
 			try {
 				final R result = callable.call();
-				handler.post(new RunnableTaskForHandler<>(callable, result));
-			} catch (Exception e) {
-				e.printStackTrace();
+				handler.post(new RunnableTaskForHandler<R>(callable, result));
+			} catch (Throwable e) {
+				handler.post(new RunnableTaskForHandler<R>(callable, e));
 			}
 		}
 	}
 	
 	public static class RunnableTaskForHandler<R> implements Runnable {
 		private final CustomCallable<R> callable;
-		private final R result;
+		private final @Nullable R result;
+		private final @Nullable Throwable error;
 		
-		public RunnableTaskForHandler(CustomCallable<R> callable, R result) {
+		public RunnableTaskForHandler(CustomCallable<R> callable, @NonNull R result) {
 			this.callable = callable;
 			this.result = result;
+			this.error = null;
+		}
+		
+		public RunnableTaskForHandler(CustomCallable<R> callable, @NonNull Throwable error) {
+			this.callable = callable;
+			this.result = null;
+			this.error = error;
 		}
 		
 		@Override
 		public void run() {
-			callable.didFinishRunning(result);
+			if (error != null) {
+				callable.didFail(error);
+				
+			} else if (result != null) {
+				callable.didFinishRunning(result);
+			}
 		}
 	}
 }

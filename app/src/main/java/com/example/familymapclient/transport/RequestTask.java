@@ -64,6 +64,7 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 		http.addRequestProperty("Authorization", "auth_token");
 		http.addRequestProperty("Accept", "application/json");
 		
+		System.out.println("Attempting to connect to " + url.toString());
 		http.connect();
 		if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
 			// Success

@@ -11,6 +11,7 @@
     <!-- Login -->
     <string name="login_fragment_label_server_host">Server Host</string>
     <string name="login_fragment_label_server_port">Server Port</string>
+    <string name="login_fragment_label_uses_https">Uses HTTPS</string>
     <string name="login_fragment_label_username">Username</string>
     <string name="login_fragment_label_password">Password</string>
     <string name="login_fragment_label_first_name">First Name</string>

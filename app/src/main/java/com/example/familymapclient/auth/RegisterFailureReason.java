@@ -7,7 +7,8 @@ public enum RegisterFailureReason {
 	MISSING_PASSWORD,
 	MISSING_EMAIL,
 	MISSING_FIRST_NAME,
-	MISSING_LAST_NAME;
+	MISSING_LAST_NAME,
+	MISSING_GENDER;
 	
 	public @NonNull String getMessage() {
 		return "";

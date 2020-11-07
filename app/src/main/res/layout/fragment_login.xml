@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/login_fragment_label_server_host"
-            android:inputType="none|numberDecimal" />
+            android:inputType="textUri" />
 
         <EditText
             android:id="@+id/input_server_port"
@@ -36,7 +36,13 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/login_fragment_label_server_port"
-            android:inputType="none|number" />
+            android:inputType="number" />
+
+        <CheckBox
+            android:id="@+id/input_uses_https"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login_fragment_label_uses_https" />
 
         <EditText
             android:id="@+id/input_username"
@@ -44,7 +50,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/login_fragment_label_username"
-            android:inputType="none|textNoSuggestions" />
+            android:inputType="textNoSuggestions" />
 
         <EditText
             android:id="@+id/input_password"
@@ -68,7 +74,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/login_fragment_label_last_name"
-            android:inputType="none|textPersonName" />
+            android:inputType="textPersonName" />
 
         <EditText
             android:id="@+id/input_email_address"
@@ -76,7 +82,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/login_fragment_label_email_address"
-            android:inputType="none|textEmailAddress" />
+            android:inputType="textEmailAddress" />
 
         <RadioGroup
             android:id="@+id/input_gender"

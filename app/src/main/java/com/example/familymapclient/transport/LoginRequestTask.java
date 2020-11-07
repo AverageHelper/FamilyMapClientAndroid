@@ -4,30 +4,30 @@ import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import requests.RegisterRequest;
+import requests.LoginRequest;
 
 /**
- * A task that sends a Family Map register request to a server.
+ * A task that sends a Family Map login request to a server.
  */
-public class RegisterRequestTask extends RequestTask<RegisterRequest> {
-	private static final String REGISTER_PATH = "/user/register";
+public class LoginRequestTask extends RequestTask<LoginRequest> {
+	private static final String LOGIN_PATH = "/user/login";
 	
 	private final @Nullable OnDataFetched<String> listener;
 	
-	public RegisterRequestTask(
+	public LoginRequestTask(
 		@NonNull MutableServerLocation location,
-		@Nullable RegisterRequest req,
+		@Nullable LoginRequest req,
 		@Nullable OnDataFetched<String> listener
 	) {
 		this(new ServerLocation(location), req, listener);
 	}
 	
-	public RegisterRequestTask(
+	public LoginRequestTask(
 		@NonNull ServerLocation location,
-		@Nullable RegisterRequest req,
+		@Nullable LoginRequest req,
 		@Nullable OnDataFetched<String> listener
 	) {
-		super(location, REGISTER_PATH, req);
+		super(location, LOGIN_PATH, req);
 		this.listener = listener;
 	}
 	

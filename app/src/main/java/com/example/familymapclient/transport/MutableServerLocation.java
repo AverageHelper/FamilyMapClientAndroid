@@ -77,6 +77,6 @@ public class MutableServerLocation {
 		if (getPortNumber() != null) {
 			portNumber = getPortNumber();
 		}
-		return new URL("http" + secure + "://" + hostName + ":" + portNumber + "/");
+		return new URL("http" + secure + "://" + hostName + ":" + portNumber + path);
 	}
 }
