@@ -2,8 +2,6 @@ package com.example.familymapclient.transport;
 
 import com.example.familymapclient.async.CustomCallable;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +44,7 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 	 * Called to determine what HTTP method this request should use.
 	 * @return The HTTP method.
 	 */
-	public abstract @NotNull String httpMethod();
+	public abstract @NonNull String httpMethod();
 	
 	
 	
