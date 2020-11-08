@@ -1,38 +1,41 @@
-package com.example.familymapclient.transport;
+package com.example.familymapclient.transport.register;
 
-import org.jetbrains.annotations.NotNull;
+import com.example.familymapclient.transport.MutableServerLocation;
+import com.example.familymapclient.transport.OnDataFetched;
+import com.example.familymapclient.transport.RequestTask;
+import com.example.familymapclient.transport.ServerLocation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import requests.LoginRequest;
+import requests.RegisterRequest;
 
 /**
- * A task that sends a Family Map login request to a server.
+ * A task that sends a Family Map register request to a server.
  */
-public class LoginRequestTask extends RequestTask<LoginRequest> {
-	private static final String LOGIN_PATH = "/user/login";
+public class RegisterRequestTask extends RequestTask<RegisterRequest> {
+	private static final String REGISTER_PATH = "/user/register";
 	
 	private final @Nullable OnDataFetched<String> listener;
 	
-	public LoginRequestTask(
+	public RegisterRequestTask(
 		@NonNull MutableServerLocation location,
-		@Nullable LoginRequest req,
+		@Nullable RegisterRequest req,
 		@Nullable OnDataFetched<String> listener
 	) {
 		this(new ServerLocation(location), req, listener);
 	}
 	
-	public LoginRequestTask(
+	public RegisterRequestTask(
 		@NonNull ServerLocation location,
-		@Nullable LoginRequest req,
+		@Nullable RegisterRequest req,
 		@Nullable OnDataFetched<String> listener
 	) {
-		super(location, LOGIN_PATH, req);
+		super(location, REGISTER_PATH, req);
 		this.listener = listener;
 	}
 	
 	@Override
-	public @NotNull String httpMethod() {
+	public @NonNull String httpMethod() {
 		return "POST";
 	}
 	

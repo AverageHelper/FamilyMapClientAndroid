@@ -10,8 +10,8 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import com.example.familymapclient.auth.Auth;
-import com.example.familymapclient.auth.LoginException;
-import com.example.familymapclient.auth.RegisterException;
+import com.example.familymapclient.transport.login.LoginException;
+import com.example.familymapclient.transport.register.RegisterException;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Locale;
@@ -67,8 +67,8 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void setupAuthListeners() {
-		signedInHandler = auth.addAuthStateDidChangeHandler(user -> {
-			if (user != null) {
+		signedInHandler = auth.addAuthStateDidChangeHandler(authToken -> {
+			if (authToken != null) {
 				// Signed in
 				this.navigateToSecondFragment();
 			}

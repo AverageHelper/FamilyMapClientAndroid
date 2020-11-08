@@ -3,6 +3,7 @@ package com.example.familymapclient;
 import android.os.Bundle;
 
 import com.example.familymapclient.auth.Auth;
+import com.example.familymapclient.data.KeyValueStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -24,12 +25,14 @@ public class MainActivity extends AppCompatActivity {
 	@Nullable Integer authStateHandler = null;
 	
 	MenuItem logOutItem;
+	KeyValueStore keyValueStore;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		restoreModelState(savedInstanceState);
+		keyValueStore = new KeyValueStore(this);
+		restoreModelState(keyValueStore);
 		
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = findViewById(R.id.toolbar);
@@ -70,12 +73,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	@Override
-	protected void onSaveInstanceState(@NonNull Bundle outState) {
-		super.onSaveInstanceState(outState);
-		saveModelState(outState);
-	}
-	
-	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		if (authStateHandler != null) {
@@ -86,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 	
 	
 	
-	private void saveModelState(@NonNull Bundle outState) {
+	private void saveModelState(@NonNull KeyValueStore outState) {
 		// Save server location
 		if (auth.getHostname() != null) {
 			outState.putString(KEY_SERVER_HOST_NAME, auth.getHostname());
@@ -105,13 +102,9 @@ public class MainActivity extends AppCompatActivity {
 		// TODO: Save auth state... ?
 	}
 	
-	private void restoreModelState(@Nullable Bundle savedInstanceState) {
-		if (savedInstanceState == null) {
-			return;
-		}
-		
+	private void restoreModelState(@NonNull KeyValueStore savedInstanceState) {
 		// Restore server location
-		auth.setUsesSecureProtocol(savedInstanceState.getBoolean(KEY_SERVER_USES_HTTPS));
+		auth.setUsesSecureProtocol(savedInstanceState.getBoolean(KEY_SERVER_USES_HTTPS, false));
 		auth.setHostname(savedInstanceState.getString(KEY_SERVER_HOST_NAME));
 		
 		if (savedInstanceState.containsKey(KEY_SERVER_PORT)) {
@@ -120,9 +113,10 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	private void setupAuthListeners() {
-		authStateHandler = auth.addAuthStateDidChangeHandler(user -> {
+		authStateHandler = auth.addAuthStateDidChangeHandler(authToken -> {
 			// Only show the Log Out item if the user is signed in
-			this.logOutItem.setVisible(user != null);
+			this.logOutItem.setVisible(authToken != null);
+			this.saveModelState(this.keyValueStore);
 		});
 	}
 }

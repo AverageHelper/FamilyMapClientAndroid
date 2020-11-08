@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 /**
  * An interface for an object that listens for start and completion events for an asynchronous task.
- * @param <R> The type of result returned by the task.
+ * @param <R> The type of response returned by the task.
  */
 public interface OnDataFetched<R> {
 	/**
@@ -17,10 +17,10 @@ public interface OnDataFetched<R> {
 	/**
 	 * Called by a task object when the task receives its <code>didFinishRunning</code> callback.
 	 * @param task The task that just completed.
-	 * @param result The result of the task.
+	 * @param response The response returned by the task.
 	 * @param <Task> The type of task.
 	 */
-	public <Task extends RequestTask<?>> void taskDidFinishRunning(@NonNull Task task, @NonNull R result);
+	public <Task extends RequestTask<?>> void taskDidFinishRunning(@NonNull Task task, @NonNull R response);
 	
 	/**
 	 * Called by a task object when the task receives its <code>didFail</code> callback.

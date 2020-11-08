@@ -1,4 +1,4 @@
-package com.example.familymapclient.auth;
+package com.example.familymapclient.transport.register;
 
 import androidx.annotation.NonNull;
 

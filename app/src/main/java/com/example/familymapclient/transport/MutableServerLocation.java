@@ -5,11 +5,13 @@ import java.net.URL;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import transport.JSONSerialization;
+import transport.MissingKeyException;
 
 /**
  * An object that represents a server hostname, port number, and protocol.
  */
-public class MutableServerLocation {
+public class MutableServerLocation extends JSONSerialization {
 	private @Nullable String hostname;
 	private @Nullable Integer portNumber;
 	private boolean usesSecureProtocol;
@@ -79,4 +81,7 @@ public class MutableServerLocation {
 		}
 		return new URL("http" + secure + "://" + hostName + ":" + portNumber + path);
 	}
+	
+	@Override
+	public void assertCorrectDeserialization() throws MissingKeyException {}
 }

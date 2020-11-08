@@ -39,8 +39,8 @@ public class SecondFragment extends Fragment {
 	}
 	
 	private void setupAuthListeners() {
-		signedOutHandler = auth.addAuthStateDidChangeHandler(user -> {
-			if (user == null) {
+		signedOutHandler = auth.addAuthStateDidChangeHandler(authToken -> {
+			if (authToken == null) {
 				// Signed out
 				this.navigateToLoginFragment();
 			}

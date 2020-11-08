@@ -1,10 +1,14 @@
 package com.example.familymapclient.auth;
 
 import com.example.familymapclient.async.TaskRunner;
-import com.example.familymapclient.transport.LoginRequestTask;
+import com.example.familymapclient.transport.login.LoginException;
+import com.example.familymapclient.transport.login.LoginFailureReason;
+import com.example.familymapclient.transport.login.LoginRequestTask;
 import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
-import com.example.familymapclient.transport.RegisterRequestTask;
+import com.example.familymapclient.transport.register.RegisterException;
+import com.example.familymapclient.transport.register.RegisterFailureReason;
+import com.example.familymapclient.transport.register.RegisterRequestTask;
 import com.example.familymapclient.transport.RequestTask;
 
 import java.util.HashMap;
@@ -13,23 +17,24 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import model.Gender;
-import model.User;
 import requests.LoginRequest;
 import requests.RegisterRequest;
+import responses.LoginResponse;
+import responses.RegisterResponse;
+import transport.JSONSerialization;
+import transport.MissingKeyException;
 
 public class Auth implements OnDataFetched<String> {
 	private @Nullable String authToken;
 	private @Nullable Throwable loginError;
-	private @Nullable User user;
 	private @Nullable TaskRunner runner;
 	private final @NonNull MutableServerLocation location;
 	
-	private final @NonNull Map<Integer, NullableValueHandler<User>> authStateDidChangeHandlers;
+	private final @NonNull Map<Integer, NullableValueHandler<String>> authStateDidChangeHandlers;
 	private final @NonNull Map<Integer, NonNullValueHandler<Throwable>> authStateDidFailToChangeHandlers;
 	
 	private Auth() {
 		this.authToken = null;
-		this.user = null;
 		this.loginError = null;
 		this.runner = null;
 		this.location = new MutableServerLocation();
@@ -45,44 +50,58 @@ public class Auth implements OnDataFetched<String> {
 		return _instance;
 	}
 	
+	
+	
+	
+	
+	/**
+	 * @return The user's auth token if the user is signed in. <code>null</code> otherwise.
+	 */
 	public @Nullable String getAuthToken() {
 		return authToken;
 	}
 	
 	/**
-	 * @return The signed-in user if the user is signed in. <code>null</code> otherwise.
+	 * @return The error that prevented the most recent login or register task from completing, or
+	 * <code>null</code> if the user is signed in or a sign-in attempt has not been made.
 	 */
-	public @Nullable User getUser() {
-		return user;
+	public @Nullable Throwable getLoginError() {
+		return loginError;
 	}
 	
-	private void setUser(@Nullable User user) {
+	
+	
+	
+	private void setAuthToken(@Nullable String authToken) {
 		this.loginError = null;
 		boolean shouldCallHandlers =
-			(this.user == null && user != null) ||
-			(this.user != null && !this.user.equals(user));
+			(this.authToken == null && authToken != null) ||
+				(this.authToken != null && !this.authToken.equals(authToken));
 		
-		this.user = user;
+		this.authToken = authToken;
 		if (shouldCallHandlers) {
-			for (NullableValueHandler<User> h : authStateDidChangeHandlers.values()) {
-				h.call(user);
+			for (NullableValueHandler<String> h : authStateDidChangeHandlers.values()) {
+				h.call(authToken);
 			}
 		}
 	}
 	
 	private void setLoginError(@NonNull Throwable error) {
-		setUser(null);
+		setAuthToken(null);
 		this.loginError = error;
 		for (NonNullValueHandler<Throwable> h : authStateDidFailToChangeHandlers.values()) {
 			h.call(error);
 		}
 	}
 	
+	
+	
+	
 	/**
 	 * @return <code>true</code> if the user is currently logged in.
 	 */
 	public boolean isSignedIn() {
-		return user != null;
+		return authToken != null;
 	}
 	
 	public boolean isRunning() {
@@ -113,6 +132,9 @@ public class Auth implements OnDataFetched<String> {
 		return location.usesSecureProtocol();
 	}
 	
+	
+	
+	
 	/**
 	 * Registers an auth-state handler.
 	 *
@@ -120,7 +142,7 @@ public class Auth implements OnDataFetched<String> {
 	 * @return A key that identifies the handler to the auth proxy. Pass this value to
 	 * <code>removeAuthStateDidChangeHandler</code> to unregister this handler.
 	 */
-	public int addAuthStateDidChangeHandler(@NonNull NullableValueHandler<User> handler) {
+	public int addAuthStateDidChangeHandler(@NonNull NullableValueHandler<String> handler) {
 		int newKey = 0;
 		for (Integer key : authStateDidChangeHandlers.keySet()) {
 			if (newKey <= key) {
@@ -206,8 +228,7 @@ public class Auth implements OnDataFetched<String> {
 	 * Logs the user out. Forgets the stored auth token and user.
 	 */
 	public void logOut() {
-		authToken = null;
-		setUser(null);
+		setAuthToken(null);
 	}
 	
 	
@@ -283,12 +304,14 @@ public class Auth implements OnDataFetched<String> {
 		// Tell fragments to update (we're loading, so clients should read that)
 	}
 	
-	public void taskDidFinishRunning(@NonNull LoginRequestTask task, @NonNull String result) {
-		System.out.println("Log In: taskDidFinishRunning " + result);
-		// Parse the result
-		// Set our logged-in state
-		
-		setLoginError(new Exception(result));
+	public void taskDidFinishRunning(@NonNull LoginRequestTask task, @NonNull String response) {
+		try {
+			LoginResponse loginResponse = JSONSerialization.fromJson(response, LoginResponse.class);
+			setAuthToken(loginResponse.getAuthToken());
+			
+		} catch (MissingKeyException e) {
+			setLoginError(e);
+		}
 	}
 	
 	public void taskDidFail(@NonNull LoginRequestTask task, @NonNull Throwable error) {
@@ -306,12 +329,15 @@ public class Auth implements OnDataFetched<String> {
 		// Tell fragments to update (we're loading, so clients should read that)
 	}
 	
-	public void taskDidFinishRunning(@NonNull RegisterRequestTask task, @NonNull String result) {
-		System.out.println("Register: taskDidFinishRunning " + result);
-		// Parse the result
-		// Set our logged-in state
-		
-		setLoginError(new Exception(result));
+	public void taskDidFinishRunning(@NonNull RegisterRequestTask task, @NonNull String response) {
+		System.out.println("Register: taskDidFinishRunning " + response);
+		try {
+			RegisterResponse registerResponse = JSONSerialization.fromJson(response, RegisterResponse.class);
+			setAuthToken(registerResponse.getAuthToken());
+			
+		} catch (MissingKeyException e) {
+			setLoginError(e);
+		}
 	}
 	
 	public void taskDidFail(@NonNull RegisterRequestTask task, @NonNull Throwable error) {

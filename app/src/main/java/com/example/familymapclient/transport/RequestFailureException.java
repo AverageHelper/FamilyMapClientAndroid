@@ -6,7 +6,7 @@ import transport.JSONSerialization;
 import transport.MissingKeyException;
 
 public class RequestFailureException extends Exception {
-	public RequestFailureException(@NonNull String message) {
+	private RequestFailureException(@NonNull String message) {
 		super(message);
 	}
 	
