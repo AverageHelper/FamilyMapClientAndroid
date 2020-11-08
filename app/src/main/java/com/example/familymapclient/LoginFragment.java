@@ -12,6 +12,9 @@ import android.widget.RadioGroup;
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.register.RegisterException;
+import com.example.familymapclient.ui.CheckboxListener;
+import com.example.familymapclient.ui.RadioGroupListener;
+import com.example.familymapclient.ui.TextFieldListener;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Locale;
@@ -29,9 +32,19 @@ public class LoginFragment extends Fragment {
 	@Nullable Integer signedInHandler = null;
 	@Nullable Integer loginFailureHandler = null;
 	
+	private @NonNull String hostName = "";
+	private @NonNull String portNumber = "";
+	private boolean prefersHTTPS = false;
+	private @NonNull String username = "";
+	private @NonNull String password = "";
+	private @NonNull String firstName = "";
+	private @NonNull String lastName = "";
+	private @NonNull String email = "";
+	private @Nullable Gender gender = null;
+	
 	private EditText hostField;
 	private EditText portField;
-	private CheckBox prefersHTTPS;
+	private CheckBox httpsSelector;
 	private EditText usernameField;
 	private EditText passwordField;
 	private EditText firstNameField;
@@ -56,10 +69,14 @@ public class LoginFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 		
 		setupAuthListeners();
+		
 		findInputFields(view);
-		prefillInputFields();
+		connectInputFields();
 		findButtons(view);
 		connectButtons();
+		
+		prefillInputFields();
+		updateButtonActivity();
 		
 		if (auth.isSignedIn()) {
 			navigateToSecondFragment();
@@ -108,14 +125,17 @@ public class LoginFragment extends Fragment {
 	private void presentMessage(@NonNull String text) {
 		View view = getView();
 		if (view != null) {
-			Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Tapped Error", null).show();
+			Snackbar
+				.make(view, text, Snackbar.LENGTH_LONG)
+				.setAction("Tapped Error", null)
+				.show();
 		}
 	}
 	
 	private void findInputFields(@NonNull View view) {
 		hostField = view.findViewById(R.id.input_server_host);
 		portField = view.findViewById(R.id.input_server_port);
-		prefersHTTPS = view.findViewById(R.id.input_uses_https);
+		httpsSelector = view.findViewById(R.id.input_uses_https);
 		usernameField = view.findViewById(R.id.input_username);
 		passwordField = view.findViewById(R.id.input_password);
 		firstNameField = view.findViewById(R.id.input_first_name);
@@ -125,13 +145,76 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void prefillInputFields() {
-		if (auth.getHostname() != null) {
+		if (!hostName.isEmpty()) {
+			hostField.setText(hostName);
+		} if (auth.getHostname() != null) {
 			hostField.setText(auth.getHostname());
 		}
-		if (auth.getPortNumber() != null) {
+		
+		if (!portNumber.isEmpty()) {
+			portField.setText(portNumber);
+		} else if (auth.getPortNumber() != null) {
 			portField.setText(String.format(Locale.getDefault(), "%1d", auth.getPortNumber()));
 		}
-		prefersHTTPS.setChecked(auth.usesSecureProtocol());
+		
+		httpsSelector.setChecked(prefersHTTPS || auth.usesSecureProtocol());
+		usernameField.setText(username);
+		passwordField.setText(password);
+		firstNameField.setText(firstName);
+		lastNameField.setText(lastName);
+		emailField.setText(email);
+		
+		if (gender == null) {
+			genderField.check(-1);
+			
+		} else if (gender == Gender.MALE) {
+			genderField.check(R.id.input_gender_male);
+			
+		} else if (gender == Gender.FEMALE) {
+			genderField.check(R.id.input_gender_female);
+		}
+	}
+	
+	private void connectInputFields() {
+		hostField.addTextChangedListener(new TextFieldListener(text -> {
+			this.hostName = text;
+			updateButtonActivity();
+		}));
+		portField.addTextChangedListener(new TextFieldListener(text -> {
+			this.portNumber = text;
+			updateButtonActivity();
+		}));
+		httpsSelector.setOnCheckedChangeListener(new CheckboxListener(isOn -> this.prefersHTTPS = isOn));
+		usernameField.addTextChangedListener(new TextFieldListener(text -> {
+			this.username = text;
+			updateButtonActivity();
+		}));
+		passwordField.addTextChangedListener(new TextFieldListener(text -> {
+			this.password = text;
+			updateButtonActivity();
+		}));
+		firstNameField.addTextChangedListener(new TextFieldListener(text -> {
+			this.firstName = text;
+			updateButtonActivity();
+		}));
+		lastNameField.addTextChangedListener(new TextFieldListener(text -> {
+			this.lastName = text;
+			updateButtonActivity();
+		}));
+		emailField.addTextChangedListener(new TextFieldListener(text -> {
+			this.email = text;
+			updateButtonActivity();
+		}));
+		genderField.setOnCheckedChangeListener(new RadioGroupListener(id -> {
+			if (id == -1) {
+				this.gender = null;
+			} else if (id == R.id.input_gender_male) {
+				this.gender = Gender.MALE;
+			} else if (id == R.id.input_gender_female) {
+				this.gender = Gender.FEMALE;
+			}
+			updateButtonActivity();
+		}));
 	}
 	
 	private void findButtons(@NonNull View view) {
@@ -144,16 +227,23 @@ public class LoginFragment extends Fragment {
 		registerButton.setOnClickListener(button -> register());
 	}
 	
-	private @Nullable Gender selectedGender() {
-		int selected = genderField.getCheckedRadioButtonId();
-		if (selected == R.id.input_gender_male) {
-			return Gender.MALE;
-			
-		} else if (selected == R.id.input_gender_female) {
-			return Gender.FEMALE;
-		}
-		
-		return null;
+	private void updateButtonActivity() {
+		loginButton.setEnabled(
+			!hostName.isEmpty() &&
+				!portNumber.isEmpty() &&
+				!username.isEmpty() &&
+				!password.isEmpty()
+		);
+		registerButton.setEnabled(
+			!hostName.isEmpty() &&
+				!portNumber.isEmpty() &&
+				!username.isEmpty() &&
+				!password.isEmpty() &&
+				!firstName.isEmpty() &&
+				!lastName.isEmpty() &&
+				!email.isEmpty() &&
+				gender != null
+		);
 	}
 	
 	
@@ -162,12 +252,9 @@ public class LoginFragment extends Fragment {
 	
 	private void login() {
 		try {
-			String username = usernameField.getText().toString();
-			String password = passwordField.getText().toString();
-			
 			updateServerLocation();
-			
 			auth.signIn(username, password);
+			
 		} catch (LoginException e) {
 			presentMessage(e.getReason().getMessage(getActivity()));
 		}
@@ -175,15 +262,9 @@ public class LoginFragment extends Fragment {
 	
 	private void register() {
 		try {
-			String username = usernameField.getText().toString();
-			String password = passwordField.getText().toString();
-			String email = emailField.getText().toString();
-			String firstName = firstNameField.getText().toString();
-			String lastName = lastNameField.getText().toString();
-			
 			updateServerLocation();
+			auth.register(username, password, email, firstName, lastName, gender);
 			
-			auth.register(username, password, email, firstName, lastName, selectedGender());
 		} catch (RegisterException e) {
 			presentMessage(e.getReason().getMessage(getActivity()));
 		}
@@ -191,18 +272,18 @@ public class LoginFragment extends Fragment {
 	
 	
 	private void updateServerLocation() {
-		auth.setUsesSecureProtocol(prefersHTTPS.isChecked());
+		auth.setUsesSecureProtocol(httpsSelector.isChecked());
 		
-		if (hostField.getText().toString().isEmpty()) {
+		if (hostName.isEmpty()) {
 			auth.setHostname(null);
 		} else {
-			auth.setHostname(hostField.getText().toString());
+			auth.setHostname(hostName);
 		}
 		
-		if (portField.getText().toString().isEmpty()) {
+		if (portNumber.isEmpty()) {
 			auth.setPortNumber(null);
 		} else {
-			auth.setPortNumber(Integer.parseInt(portField.getText().toString()));
+			auth.setPortNumber(Integer.parseInt(portNumber));
 		}
 	}
 }
