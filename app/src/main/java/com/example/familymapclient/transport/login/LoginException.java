@@ -11,7 +11,7 @@ public class LoginException extends Exception {
 	}
 	
 	public LoginException(@NonNull LoginFailureReason reason, @Nullable Exception e) {
-		super(reason.getMessage(), e);
+		super(reason.getMessage(null), e);
 		this.reason = reason;
 	}
 	

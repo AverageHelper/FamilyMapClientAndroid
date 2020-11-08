@@ -85,31 +85,18 @@ public class MainActivity extends AppCompatActivity {
 	
 	private void saveModelState(@NonNull KeyValueStore outState) {
 		// Save server location
-		if (auth.getHostname() != null) {
-			outState.putString(KEY_SERVER_HOST_NAME, auth.getHostname());
-		} else {
-			outState.remove(KEY_SERVER_HOST_NAME);
-		}
-		
-		if (auth.getPortNumber() != null) {
-			outState.putInt(KEY_SERVER_PORT, auth.getPortNumber());
-		} else {
-			outState.remove(KEY_SERVER_PORT);
-		}
-		
+		outState.putString(KEY_SERVER_HOST_NAME, auth.getHostname());
+		outState.putInt(KEY_SERVER_PORT, auth.getPortNumber());
 		outState.putBoolean(KEY_SERVER_USES_HTTPS, auth.usesSecureProtocol());
 		
-		// TODO: Save auth state... ?
+		// TODO: Save auth token... ?
 	}
 	
 	private void restoreModelState(@NonNull KeyValueStore savedInstanceState) {
 		// Restore server location
 		auth.setUsesSecureProtocol(savedInstanceState.getBoolean(KEY_SERVER_USES_HTTPS, false));
 		auth.setHostname(savedInstanceState.getString(KEY_SERVER_HOST_NAME));
-		
-		if (savedInstanceState.containsKey(KEY_SERVER_PORT)) {
-			auth.setPortNumber(savedInstanceState.getInt(KEY_SERVER_HOST_NAME));
-		}
+		auth.setPortNumber(savedInstanceState.getInt(KEY_SERVER_HOST_NAME));
 	}
 	
 	private void setupAuthListeners() {

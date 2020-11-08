@@ -11,7 +11,7 @@ public class RegisterException extends Exception {
 	}
 	
 	public RegisterException(@NonNull RegisterFailureReason reason, @Nullable Exception e) {
-		super(reason.getMessage(), e);
+		super(reason.getMessage(null), e);
 		this.reason = reason;
 	}
 	

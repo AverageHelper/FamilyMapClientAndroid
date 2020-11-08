@@ -169,7 +169,7 @@ public class LoginFragment extends Fragment {
 			
 			auth.signIn(username, password);
 		} catch (LoginException e) {
-			presentMessage(e.getReason().getMessage());
+			presentMessage(e.getReason().getMessage(getActivity()));
 		}
 	}
 	
@@ -185,7 +185,7 @@ public class LoginFragment extends Fragment {
 			
 			auth.register(username, password, email, firstName, lastName, selectedGender());
 		} catch (RegisterException e) {
-			presentMessage(e.getReason().getMessage());
+			presentMessage(e.getReason().getMessage(getActivity()));
 		}
 	}
 	

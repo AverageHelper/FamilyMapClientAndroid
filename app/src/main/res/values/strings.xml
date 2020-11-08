@@ -23,6 +23,14 @@
     <string name="login_fragment_button_sign_in">Sign In</string>
     <string name="login_fragment_button_register">Register</string>
 
+    <!-- Login Errors -->
+    <string name="login_error_missing_username">The Username field is required</string>
+    <string name="login_error_missing_password">The Password field is required</string>
+    <string name="login_error_missing_email">The Email field is required</string>
+    <string name="login_error_missing_first_name">You must provide a first name</string>
+    <string name="login_error_missing_last_name">You must provide a last name</string>
+    <string name="login_error_missing_gender">You must specify a gender</string>
+
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>

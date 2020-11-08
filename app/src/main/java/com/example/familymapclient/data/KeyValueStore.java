@@ -185,15 +185,18 @@ public class KeyValueStore {
 	}
 	
 	
-	public void putString(@NonNull String key, @NonNull String value) {
+	public void putString(@NonNull String key, @Nullable String value) {
 		KeyValueStore.putString(context, key, value);
 	}
 	
 	public static void putString(
 		@NonNull Context context,
 		@NonNull String key,
-		@NonNull String value
+		@Nullable String value
 	) {
+		if (value == null) {
+			remove(context, key);
+		}
 		SharedPreferences sharedPref = preferencesForContext(context);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putString(key, value);
@@ -201,15 +204,19 @@ public class KeyValueStore {
 	}
 	
 	
-	public void putInt(@NonNull String key, int value) {
+	public void putInt(@NonNull String key, @Nullable Integer value) {
 		KeyValueStore.putInt(context, key, value);
 	}
 	
 	public static void putInt(
 		@NonNull Context context,
 		@NonNull String key,
-		int value
+		@Nullable Integer value
 	) {
+		if (value == null) {
+			remove(context, key);
+			return;
+		}
 		SharedPreferences sharedPref = preferencesForContext(context);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putInt(key, value);
@@ -217,15 +224,19 @@ public class KeyValueStore {
 	}
 	
 	
-	public void putBoolean(@NonNull String key, boolean value) {
+	public void putBoolean(@NonNull String key, @Nullable Boolean value) {
 		KeyValueStore.putBoolean(context, key, value);
 	}
 	
 	public static void putBoolean(
 		@NonNull Context context,
 		@NonNull String key,
-		boolean value
+		@Nullable Boolean value
 	) {
+		if (value == null) {
+			remove(context, key);
+			return;
+		}
 		SharedPreferences sharedPref = preferencesForContext(context);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putBoolean(key, value);
@@ -233,15 +244,19 @@ public class KeyValueStore {
 	}
 	
 	
-	public void putFloat(@NonNull String key, float value) {
+	public void putFloat(@NonNull String key, @Nullable Float value) {
 		KeyValueStore.putFloat(context, key, value);
 	}
 	
 	public static void putFloat(
 		@NonNull Context context,
 		@NonNull String key,
-		float value
+		@Nullable Float value
 	) {
+		if (value == null) {
+			remove(context, key);
+			return;
+		}
 		SharedPreferences sharedPref = preferencesForContext(context);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putFloat(key, value);
@@ -249,15 +264,19 @@ public class KeyValueStore {
 	}
 	
 	
-	public void putLong(@NonNull String key, long value) {
+	public void putLong(@NonNull String key, @Nullable Long value) {
 		KeyValueStore.putLong(context, key, value);
 	}
 	
 	public static void putLong(
 		@NonNull Context context,
 		@NonNull String key,
-		long value
+		@Nullable Long value
 	) {
+		if (value == null) {
+			remove(context, key);
+			return;
+		}
 		SharedPreferences sharedPref = preferencesForContext(context);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putLong(key, value);
@@ -265,15 +284,19 @@ public class KeyValueStore {
 	}
 	
 	
-	public void putStringSet(@NonNull String key, @NonNull Set<String> value) {
+	public void putStringSet(@NonNull String key, @Nullable Set<String> value) {
 		KeyValueStore.putStringSet(context, key, value);
 	}
 	
 	public static void putStringSet(
 		@NonNull Context context,
 		@NonNull String key,
-		@NonNull Set<String> value
-		) {
+		@Nullable Set<String> value
+	) {
+		if (value == null) {
+			remove(context, key);
+			return;
+		}
 		SharedPreferences sharedPref = preferencesForContext(context);
 		SharedPreferences.Editor editor = sharedPref.edit();
 		editor.putStringSet(key, value);
