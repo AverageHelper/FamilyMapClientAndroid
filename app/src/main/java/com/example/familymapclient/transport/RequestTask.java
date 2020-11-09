@@ -48,6 +48,14 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 	public abstract @NonNull String httpMethod();
 	
 	
+	/**
+	 * @return The user's auth token, or <code>null</code> if no token is needed.
+	 */
+	public @Nullable String authToken() {
+		return null;
+	}
+	
+	
 	
 	
 	
@@ -61,7 +69,10 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 		http.setRequestMethod(httpMethod());
 		http.setDoOutput(req != null); // false if there is no request body
 		
-//		http.addRequestProperty("Authorization", "auth_token");
+		if (authToken() != null) {
+			http.addRequestProperty("Authorization", authToken());
+		}
+		
 		if (req == null) {
 			http.addRequestProperty("Accept", "application/json");
 		} else {

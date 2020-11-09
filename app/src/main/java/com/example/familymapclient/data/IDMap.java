@@ -50,6 +50,13 @@ public class IDMap<ID, Element extends Identifiable<ID>> {
 	}
 	
 	/**
+	 * Removes every element from the cache.
+	 */
+	public void clear() {
+		values.clear();
+	}
+	
+	/**
 	 * Forgets and returns the element with the given <code>id</code>.
 	 *
 	 * @param id The unique identifier of the element to remove.

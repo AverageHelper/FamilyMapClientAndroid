@@ -26,6 +26,7 @@ import transport.MissingKeyException;
 
 public class Auth implements OnDataFetched<String> {
 	private @Nullable String authToken;
+	private @Nullable String personID;
 	private @Nullable Throwable loginError;
 	private @Nullable TaskRunner runner;
 	private final @NonNull MutableServerLocation location;
@@ -35,6 +36,7 @@ public class Auth implements OnDataFetched<String> {
 	
 	private Auth() {
 		this.authToken = null;
+		this.personID = null;
 		this.loginError = null;
 		this.runner = null;
 		this.location = new MutableServerLocation();
@@ -62,6 +64,13 @@ public class Auth implements OnDataFetched<String> {
 	}
 	
 	/**
+	 * @return The user's person ID if the user is signed in. <code>null</code> otherwise.
+	 */
+	public @Nullable String getPersonID() {
+		return personID;
+	}
+	
+	/**
 	 * @return The error that prevented the most recent login or register task from completing, or
 	 * <code>null</code> if the user is signed in or a sign-in attempt has not been made.
 	 */
@@ -72,13 +81,14 @@ public class Auth implements OnDataFetched<String> {
 	
 	
 	
-	private void setAuthToken(@Nullable String authToken) {
+	private void setAuthDetails(@Nullable String authToken, @Nullable String personID) {
 		this.loginError = null;
 		boolean shouldCallHandlers =
 			(this.authToken == null && authToken != null) ||
 				(this.authToken != null && !this.authToken.equals(authToken));
 		
 		this.authToken = authToken;
+		this.personID = personID;
 		if (shouldCallHandlers) {
 			for (NullableValueHandler<String> h : authStateDidChangeHandlers.values()) {
 				h.call(authToken);
@@ -87,7 +97,7 @@ public class Auth implements OnDataFetched<String> {
 	}
 	
 	private void setLoginError(@NonNull Throwable error) {
-		setAuthToken(null);
+		setAuthDetails(null, null);
 		this.loginError = error;
 		for (NonNullValueHandler<Throwable> h : authStateDidFailToChangeHandlers.values()) {
 			h.call(error);
@@ -228,7 +238,7 @@ public class Auth implements OnDataFetched<String> {
 	 * Logs the user out. Forgets the stored auth token and user.
 	 */
 	public void logOut() {
-		setAuthToken(null);
+		setAuthDetails(null, null);
 	}
 	
 	
@@ -301,13 +311,16 @@ public class Auth implements OnDataFetched<String> {
 	// ** Login Callbacks
 	
 	public void taskWillBeginRunning(@NonNull LoginRequestTask task) {
-		// Tell fragments to update (we're loading, so clients should read that)
+		// Tell fragments to update?
 	}
 	
 	public void taskDidFinishRunning(@NonNull LoginRequestTask task, @NonNull String response) {
 		try {
 			LoginResponse loginResponse = JSONSerialization.fromJson(response, LoginResponse.class);
-			setAuthToken(loginResponse.getAuthToken());
+			setAuthDetails(
+				loginResponse.getAuthToken(),
+				loginResponse.getPersonID()
+			);
 			
 		} catch (MissingKeyException e) {
 			setLoginError(e);
@@ -333,7 +346,10 @@ public class Auth implements OnDataFetched<String> {
 		System.out.println("Register: taskDidFinishRunning " + response);
 		try {
 			RegisterResponse registerResponse = JSONSerialization.fromJson(response, RegisterResponse.class);
-			setAuthToken(registerResponse.getAuthToken());
+			setAuthDetails(
+				registerResponse.getAuthToken(),
+				registerResponse.getPersonID()
+			);
 			
 		} catch (MissingKeyException e) {
 			setLoginError(e);

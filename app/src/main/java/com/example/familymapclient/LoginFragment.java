@@ -8,9 +8,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.example.familymapclient.auth.Auth;
+import com.example.familymapclient.data.PersonCache;
+import com.example.familymapclient.data.fetch.PersonFetchResponder;
+import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.register.RegisterException;
 import com.example.familymapclient.ui.CheckboxListener;
@@ -23,8 +25,6 @@ import java.util.Locale;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
 import model.Gender;
 
 public class LoginFragment extends Fragment {
@@ -32,6 +32,8 @@ public class LoginFragment extends Fragment {
 	public Auth auth = Auth.shared();
 	@Nullable Integer signedInHandler = null;
 	@Nullable Integer loginFailureHandler = null;
+	
+	public PersonCache personCache = PersonCache.shared();
 	
 	private @NonNull String hostName = "";
 	private @NonNull String portNumber = "";
@@ -85,15 +87,8 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void setupAuthListeners() {
-		signedInHandler = auth.addAuthStateDidChangeHandler(authToken -> {
-			if (authToken != null) {
-				// Signed in
-				this.navigateToSecondFragment();
-			}
-		});
-		loginFailureHandler = auth.addFailureHandler(error -> {
-			this.handleLoginFailure(error);
-		});
+		signedInHandler = auth.addAuthStateDidChangeHandler(this::handleAuthChange);
+		loginFailureHandler = auth.addFailureHandler(this::handleAsyncFailure);
 	}
 	
 	private void prepareForNavigation() {
@@ -108,9 +103,10 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void navigateToSecondFragment() {
-		prepareForNavigation();
-		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
-		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
+		// FIXME: Re-enable login-based navigation
+//		prepareForNavigation();
+//		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
+//		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
 	}
 	
 	private void findInputFields(@NonNull View view) {
@@ -229,7 +225,17 @@ public class LoginFragment extends Fragment {
 		);
 	}
 	
-	private void handleLoginFailure(@NonNull Throwable error) {
+	private void handleAuthChange(@Nullable String authToken) {
+		if (authToken != null) {
+			// Signed in
+			fetchPerson();
+		} else {
+			// Signed out
+			personCache.clear();
+		}
+	}
+	
+	private void handleAsyncFailure(@NonNull Throwable error) {
 		if (error instanceof LoginException) {
 			LoginException e = (LoginException) error;
 			presentMessage(e.getReason().getMessage(getActivity()));
@@ -269,7 +275,7 @@ public class LoginFragment extends Fragment {
 			auth.signIn(username, password);
 			
 		} catch (LoginException e) {
-			handleLoginFailure(e);
+			handleAsyncFailure(e);
 		}
 	}
 	
@@ -279,8 +285,35 @@ public class LoginFragment extends Fragment {
 			auth.register(username, password, email, firstName, lastName, gender);
 			
 		} catch (RegisterException e) {
-			handleLoginFailure(e);
+			handleAsyncFailure(e);
 		}
+	}
+	
+	
+	private @Nullable PersonFetchResponder personFetch = null;
+	
+	private void fetchPerson() {
+		if (auth.getPersonID() == null || auth.getAuthToken() == null) {
+			return;
+		}
+		personFetch = personCache.fetchPersonWithID(
+			new ServerLocation(
+				auth.getHostname(),
+				auth.getPortNumber(),
+				auth.usesSecureProtocol()
+			),
+			auth.getPersonID(),
+			auth.getAuthToken(),
+			person -> {
+				this.presentMessage("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
+				this.personFetch = null;
+				this.navigateToSecondFragment();
+			},
+			error -> {
+				this.handleAsyncFailure(error);
+				this.personFetch = null;
+			}
+		);
 	}
 	
 	

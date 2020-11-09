@@ -1,5 +1,9 @@
 package com.example.familymapclient.data;
 
+import com.example.familymapclient.auth.NonNullValueHandler;
+import com.example.familymapclient.data.fetch.PersonFetchResponder;
+import com.example.familymapclient.transport.ServerLocation;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +17,19 @@ import model.Person;
 public class PersonCache extends IDMap<String, Person> {
 	private final Map<String, List<Event>> personEvents;
 	
-	public PersonCache() {
+	private static @Nullable PersonCache instance = null;
+	public static @NonNull PersonCache shared() {
+		if (instance == null) {
+			instance = new PersonCache();
+		}
+		return instance;
+	}
+	
+	private PersonCache() {
 		super();
 		this.personEvents = new HashMap<>();
 	}
+	
 	
 	/**
 	 * Gets the list of known events associated with the given <code>person</code>.
@@ -42,9 +55,33 @@ public class PersonCache extends IDMap<String, Person> {
 		}
 	}
 	
+	/**
+	 * Clears the cache.
+	 */
+	public void clear() {
+		personEvents.clear();
+		super.clear();
+	}
+	
 	@Override
 	public @Nullable Person removeValueWithID(@NonNull String id) {
 		personEvents.remove(id);
 		return super.removeValueWithID(id);
+	}
+	
+	
+	// ** Fetching Persons
+	
+	public @NonNull PersonFetchResponder fetchPersonWithID(
+		@NonNull ServerLocation location,
+		@NonNull String personID,
+		@NonNull String authToken,
+		@NonNull NonNullValueHandler<Person> onSuccess,
+		@NonNull NonNullValueHandler<Throwable> onFailure
+	) {
+		PersonFetchResponder responder =
+			new PersonFetchResponder(location, personID, authToken, this, onSuccess, onFailure);
+		responder.start();
+		return responder;
 	}
 }
