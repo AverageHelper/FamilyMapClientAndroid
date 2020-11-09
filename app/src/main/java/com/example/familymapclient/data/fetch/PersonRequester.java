@@ -2,7 +2,6 @@ package com.example.familymapclient.data.fetch;
 
 import com.example.familymapclient.async.TaskRunner;
 import com.example.familymapclient.auth.NonNullValueHandler;
-import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RequestTask;
 import com.example.familymapclient.transport.ServerLocation;
@@ -18,30 +17,35 @@ import transport.MissingKeyException;
 /**
  * An object that performs a fetch request, updating the provided cache with the returned data.
  */
-public class PersonFetchResponder implements OnDataFetched<String> {
+public class PersonRequester implements OnDataFetched<String> {
 	private @Nullable Person person;
 	private @Nullable Throwable fetchError;
 	private @Nullable TaskRunner runner;
+	private final @NonNull NonNullValueHandler<Person> onSuccess;
+	private final @NonNull NonNullValueHandler<Throwable> onFailure;
 	
 	private final @NonNull String personID;
 	private final @NonNull ServerLocation location;
 	private final @NonNull String authToken;
-	private final @Nullable PersonCache cache;
-	private final @NonNull NonNullValueHandler<Person> onSuccess;
-	private final @NonNull NonNullValueHandler<Throwable> onFailure;
 	
-	public PersonFetchResponder(
+	/**
+	 * Creates a new <code>FuturePerson</code> object.
+	 * @param location The server's protocol, hostname, and port number.
+	 * @param personID The ID of the person to fetch.
+	 * @param authToken The user's auth token.
+	 * @param onSuccess A runnable to call upon successful return of a <code>Person</code> object.
+	 * @param onFailure A runnable to call upon failed return of a <code>Person</code> object.
+	 */
+	public PersonRequester(
 		@NonNull ServerLocation location,
 		@NonNull String personID,
 		@NonNull String authToken,
-		@Nullable PersonCache cache,
 		@NonNull NonNullValueHandler<Person> onSuccess,
 		@NonNull NonNullValueHandler<Throwable> onFailure
 	) {
 		this.location = location;
 		this.personID = personID;
 		this.authToken = authToken;
-		this.cache = cache;
 		this.onSuccess = onSuccess;
 		this.onFailure = onFailure;
 		this.person = null;
@@ -49,12 +53,39 @@ public class PersonFetchResponder implements OnDataFetched<String> {
 	}
 	
 	
+	/**
+	 * @return The person that was fetched, or <code>null</code> if the fetch failed or no fetch was
+	 * attempted.
+	 */
+	public @Nullable Person getPerson() {
+		return person;
+	}
+	
+	/**
+	 * @return The reason the fetch failed, or <code>null</code> if the fetch succeeded or no fetch was
+	 * attempted.
+	 */
+	public @Nullable Throwable getFetchError() {
+		return fetchError;
+	}
+	
+	/**
+	 * @return <code>true</code> if the task is presently running.
+	 */
 	public boolean isRunning() {
 		return runner != null;
 	}
 	
 	
+	/**
+	 * Sends the request to the server.
+	 */
 	public void start() {
+		if (getPerson() != null) {
+			// Forward the known Person
+			this.onSuccess.call(getPerson());
+			return;
+		}
 		// Start the fetch
 		PersonRequestTask task = new PersonRequestTask(location, personID, authToken, this);
 		runner = new TaskRunner();
@@ -65,9 +96,6 @@ public class PersonFetchResponder implements OnDataFetched<String> {
 	private void setPerson(@NonNull Person person) {
 		this.person = person;
 		this.fetchError = null;
-		if (cache != null) {
-			cache.add(person);
-		}
 		this.onSuccess.call(person);
 	}
 	

@@ -1,7 +1,7 @@
 package com.example.familymapclient.data;
 
 import com.example.familymapclient.auth.NonNullValueHandler;
-import com.example.familymapclient.data.fetch.PersonFetchResponder;
+import com.example.familymapclient.data.fetch.PersonRequester;
 import com.example.familymapclient.transport.ServerLocation;
 
 import java.util.ArrayList;
@@ -72,15 +72,26 @@ public class PersonCache extends IDMap<String, Person> {
 	
 	// ** Fetching Persons
 	
-	public @NonNull PersonFetchResponder fetchPersonWithID(
+	public @NonNull
+	PersonRequester fetchPersonWithID(
 		@NonNull ServerLocation location,
 		@NonNull String personID,
 		@NonNull String authToken,
 		@NonNull NonNullValueHandler<Person> onSuccess,
 		@NonNull NonNullValueHandler<Throwable> onFailure
 	) {
-		PersonFetchResponder responder =
-			new PersonFetchResponder(location, personID, authToken, this, onSuccess, onFailure);
+		PersonRequester responder =
+			new PersonRequester(
+				location,
+				personID,
+				authToken,
+				person -> {
+					// Add the new Person to the cache
+					this.add(person);
+					onSuccess.call(person);
+				},
+				onFailure
+			);
 		responder.start();
 		return responder;
 	}

@@ -8,10 +8,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.data.PersonCache;
-import com.example.familymapclient.data.fetch.PersonFetchResponder;
+import com.example.familymapclient.data.fetch.PersonRequester;
 import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.register.RegisterException;
@@ -25,6 +26,8 @@ import java.util.Locale;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 import model.Gender;
 
 public class LoginFragment extends Fragment {
@@ -103,10 +106,9 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void navigateToSecondFragment() {
-		// FIXME: Re-enable login-based navigation
-//		prepareForNavigation();
-//		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
-//		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
+		prepareForNavigation();
+		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
+		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
 	}
 	
 	private void findInputFields(@NonNull View view) {
@@ -238,31 +240,34 @@ public class LoginFragment extends Fragment {
 	private void handleAsyncFailure(@NonNull Throwable error) {
 		if (error instanceof LoginException) {
 			LoginException e = (LoginException) error;
-			presentMessage(e.getReason().getMessage(getActivity()));
+			presentSnackbar(e.getReason().getMessage(getActivity()));
 			
 		} else if (error instanceof RegisterException) {
 			RegisterException e = (RegisterException) error;
-			presentMessage(e.getReason().getMessage(getActivity()));
+			presentSnackbar(e.getReason().getMessage(getActivity()));
 			
 		} else if (error instanceof Exception) {
 			Exception e = (Exception) error;
 			if (e.getMessage() != null) {
-				presentMessage(e.getMessage());
+				presentSnackbar(e.getMessage());
 			} else {
-				presentMessage(e.toString());
+				presentSnackbar(e.toString());
 			}
 			
 		} else {
-			presentMessage(error.toString());
+			presentSnackbar(error.toString());
 		}
 	}
 	
-	private void presentMessage(@NonNull String text) {
+	private void presentToast(@NonNull String text) {
+		Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
+	}
+	
+	private void presentSnackbar(@NonNull String text) {
 		View view = getView();
 		if (view != null) {
 			Snackbar.make(view, text, Snackbar.LENGTH_LONG).show();
 		}
-//		Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
 	}
 	
 	
@@ -290,7 +295,8 @@ public class LoginFragment extends Fragment {
 	}
 	
 	
-	private @Nullable PersonFetchResponder personFetch = null;
+	private @Nullable
+	PersonRequester personFetch = null;
 	
 	private void fetchPerson() {
 		if (auth.getPersonID() == null || auth.getAuthToken() == null) {
@@ -305,7 +311,7 @@ public class LoginFragment extends Fragment {
 			auth.getPersonID(),
 			auth.getAuthToken(),
 			person -> {
-				this.presentMessage("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
+				this.presentToast("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
 				this.personFetch = null;
 				this.navigateToSecondFragment();
 			},
