@@ -9,7 +9,9 @@ import androidx.annotation.Nullable;
 
 public enum LoginFailureReason {
 	MISSING_USERNAME,
-	MISSING_PASSWORD;
+	MISSING_PASSWORD,
+	USER_NOT_FOUND,
+	INCORRECT_PASSWORD;
 	
 	public @NonNull String getMessage(@Nullable Context context) {
 		if (context == null) {
@@ -21,6 +23,12 @@ public enum LoginFailureReason {
 			
 			case MISSING_PASSWORD:
 				return context.getString(R.string.login_error_missing_password);
+				
+			case USER_NOT_FOUND:
+				return context.getString(R.string.login_error_user_not_found);
+				
+			case INCORRECT_PASSWORD:
+				return context.getString(R.string.login_error_incorrect_password);
 			
 			default:
 				return this.name();

@@ -30,6 +30,9 @@
     <string name="login_error_missing_first_name">You must provide a first name</string>
     <string name="login_error_missing_last_name">You must provide a last name</string>
     <string name="login_error_missing_gender">You must specify a gender</string>
+    <string name="login_error_user_not_found">That user does not exist</string>
+    <string name="login_error_incorrect_password">That password is incorrect</string>
+    <string name="login_error_duplicate_username">That username is not available</string>
 
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>

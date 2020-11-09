@@ -19,6 +19,7 @@ import transport.JSONSerialization;
  * @param <Request> The type of request object to send.
  */
 public abstract class RequestTask<Request extends JSONSerialization> implements CustomCallable<String> {
+	
 	private final @NonNull ServerLocation location;
 	private final @Nullable Request req;
 	private final @NonNull String path;
@@ -97,9 +98,12 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 	}
 	
 	
-	
-	
-	
+	/**
+	 * Reads a UTF-8 string from the given input <code>stream</code>.
+	 * @param stream The stream of data from which a string should be interpreted.
+	 * @return A string representation of the stream's data.
+	 * @throws IOException if there was a problem reading UTF-8 bytes from the stream.
+	 */
 	private @NonNull String readString(@NonNull InputStream stream) throws IOException {
 		BufferedReader httpInput = new BufferedReader(new InputStreamReader(
 			stream,
@@ -114,6 +118,12 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 		return in.toString();
 	}
 	
+	/**
+	 * Writes the provided <code>text</code> to the output <code>stream</code>.
+	 * @param text The string to write.
+	 * @param stream The stream to which <code>text</code> should be written.
+	 * @throws IOException if there was a problem writing to the stream.
+	 */
 	private void writeString(@NonNull String text, @NonNull OutputStream stream) throws IOException {
 		stream.write(text.getBytes());
 	}

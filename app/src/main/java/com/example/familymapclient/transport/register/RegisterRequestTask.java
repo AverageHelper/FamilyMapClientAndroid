@@ -2,6 +2,7 @@ package com.example.familymapclient.transport.register;
 
 import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
+import com.example.familymapclient.transport.RequestFailureException;
 import com.example.familymapclient.transport.RequestTask;
 import com.example.familymapclient.transport.ServerLocation;
 
@@ -58,6 +59,20 @@ public class RegisterRequestTask extends RequestTask<RegisterRequest> {
 	@Override
 	public void didFail(@NonNull Throwable error) {
 		if (listener != null) {
+			// Try to parse the error into a localized message
+			if (error instanceof RequestFailureException) {
+				RequestFailureException e = (RequestFailureException) error;
+				
+				if (e.getMessage() != null) {
+					if (e.getMessage().contains("DUPLICATE_USERNAME")) {
+						listener.taskDidFail(this,
+							new RegisterException(RegisterFailureReason.DUPLICATE_USERNAME));
+						return;
+					}
+				}
+			}
+			
+			// Fallback to the server's raw message
 			listener.taskDidFail(this, error);
 		}
 	}

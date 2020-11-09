@@ -13,7 +13,8 @@ public enum RegisterFailureReason {
 	MISSING_EMAIL,
 	MISSING_FIRST_NAME,
 	MISSING_LAST_NAME,
-	MISSING_GENDER;
+	MISSING_GENDER,
+	DUPLICATE_USERNAME;
 	
 	public @NonNull String getMessage(@Nullable Context context) {
 		if (context == null) {
@@ -37,6 +38,9 @@ public enum RegisterFailureReason {
 				
 			case MISSING_GENDER:
 				return context.getString(R.string.login_error_missing_gender);
+				
+			case DUPLICATE_USERNAME:
+				return context.getString(R.string.login_error_duplicate_username);
 				
 			default:
 				return this.name();

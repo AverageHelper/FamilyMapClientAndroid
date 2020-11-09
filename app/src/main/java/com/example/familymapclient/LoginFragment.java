@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.transport.login.LoginException;
@@ -91,17 +92,7 @@ public class LoginFragment extends Fragment {
 			}
 		});
 		loginFailureHandler = auth.addFailureHandler(error -> {
-			if (error instanceof Exception) {
-				Exception e = (Exception) error;
-				if (e.getMessage() != null) {
-					this.presentMessage(e.getMessage());
-				} else {
-					this.presentMessage(e.toString());
-				}
-				
-			} else {
-				this.presentMessage(error.toString());
-			}
+			this.handleLoginFailure(error);
 		});
 	}
 	
@@ -120,16 +111,6 @@ public class LoginFragment extends Fragment {
 		prepareForNavigation();
 		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
 		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
-	}
-	
-	private void presentMessage(@NonNull String text) {
-		View view = getView();
-		if (view != null) {
-			Snackbar
-				.make(view, text, Snackbar.LENGTH_LONG)
-				.setAction("Tapped Error", null)
-				.show();
-		}
 	}
 	
 	private void findInputFields(@NonNull View view) {
@@ -227,6 +208,8 @@ public class LoginFragment extends Fragment {
 		registerButton.setOnClickListener(button -> register());
 	}
 	
+	
+	
 	private void updateButtonActivity() {
 		loginButton.setEnabled(
 			!hostName.isEmpty() &&
@@ -246,6 +229,36 @@ public class LoginFragment extends Fragment {
 		);
 	}
 	
+	private void handleLoginFailure(@NonNull Throwable error) {
+		if (error instanceof LoginException) {
+			LoginException e = (LoginException) error;
+			presentMessage(e.getReason().getMessage(getActivity()));
+			
+		} else if (error instanceof RegisterException) {
+			RegisterException e = (RegisterException) error;
+			presentMessage(e.getReason().getMessage(getActivity()));
+			
+		} else if (error instanceof Exception) {
+			Exception e = (Exception) error;
+			if (e.getMessage() != null) {
+				presentMessage(e.getMessage());
+			} else {
+				presentMessage(e.toString());
+			}
+			
+		} else {
+			presentMessage(error.toString());
+		}
+	}
+	
+	private void presentMessage(@NonNull String text) {
+		View view = getView();
+		if (view != null) {
+			Snackbar.make(view, text, Snackbar.LENGTH_LONG).show();
+		}
+//		Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
+	}
+	
 	
 	
 	// ** Actions
@@ -256,7 +269,7 @@ public class LoginFragment extends Fragment {
 			auth.signIn(username, password);
 			
 		} catch (LoginException e) {
-			presentMessage(e.getReason().getMessage(getActivity()));
+			handleLoginFailure(e);
 		}
 	}
 	
@@ -266,13 +279,13 @@ public class LoginFragment extends Fragment {
 			auth.register(username, password, email, firstName, lastName, gender);
 			
 		} catch (RegisterException e) {
-			presentMessage(e.getReason().getMessage(getActivity()));
+			handleLoginFailure(e);
 		}
 	}
 	
 	
 	private void updateServerLocation() {
-		auth.setUsesSecureProtocol(httpsSelector.isChecked());
+		auth.setUsesSecureProtocol(prefersHTTPS);
 		
 		if (hostName.isEmpty()) {
 			auth.setHostname(null);
