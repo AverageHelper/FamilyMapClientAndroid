@@ -7,6 +7,7 @@
 
     <!-- Navigation Labels -->
     <string name="login_fragment_label">Login</string>
+    <string name="map_fragment_label">Map</string>
 
     <!-- Login -->
     <string name="login_fragment_label_server_host">Server Host</string>
@@ -34,12 +35,8 @@
     <string name="login_error_incorrect_password">That password is incorrect</string>
     <string name="login_error_duplicate_username">That username is not available</string>
 
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+<!--    <string name="hello_first_fragment">Hello first fragment</string>-->
+<!--    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>-->
 
     <!-- Identifiers -->
     <string name="preference_file_key">com.example.familymapclient.PREFERENCE_FILE_KEY</string>

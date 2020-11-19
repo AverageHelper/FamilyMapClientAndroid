@@ -85,7 +85,7 @@ public class LoginFragment extends Fragment {
 		updateButtonActivity();
 		
 		if (auth.isSignedIn()) {
-			navigateToSecondFragment();
+			navigateToMapFragment();
 		}
 	}
 	
@@ -105,10 +105,10 @@ public class LoginFragment extends Fragment {
 		}
 	}
 	
-	private void navigateToSecondFragment() {
+	private void navigateToMapFragment() {
 		prepareForNavigation();
 		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
-		navController.navigate(R.id.action_LoginFragment_to_SecondFragment);
+		navController.navigate(R.id.action_LoginFragment_to_MapFragment);
 	}
 	
 	private void findInputFields(@NonNull View view) {
@@ -312,7 +312,7 @@ public class LoginFragment extends Fragment {
 			person -> {
 				this.presentToast("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
 				this.personFetch = null;
-				this.navigateToSecondFragment();
+				this.navigateToMapFragment();
 			},
 			error -> {
 				this.handleAsyncFailure(error);
