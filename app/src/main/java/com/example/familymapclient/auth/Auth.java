@@ -1,6 +1,7 @@
 package com.example.familymapclient.auth;
 
 import com.example.familymapclient.async.TaskRunner;
+import com.example.familymapclient.data.PersistentStore;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.login.LoginFailureReason;
 import com.example.familymapclient.transport.login.LoginRequestTask;
@@ -25,11 +26,15 @@ import transport.JSONSerialization;
 import transport.MissingKeyException;
 
 public class Auth implements OnDataFetched<String> {
+	private static final String STORED_AUTH_TOKEN = "STORED_AUTH_TOKEN";
+	private static final String STORED_PERSON_ID = "STORED_PERSON_ID";
+	
 	private @Nullable String authToken;
 	private @Nullable String personID;
 	private @Nullable Throwable loginError;
 	private @Nullable TaskRunner runner;
 	private final @NonNull MutableServerLocation location;
+	private @Nullable PersistentStore persistentStore;
 	
 	private final @NonNull Map<Integer, NullableValueHandler<String>> authStateDidChangeHandlers;
 	private final @NonNull Map<Integer, NonNullValueHandler<Throwable>> authStateDidFailToChangeHandlers;
@@ -42,6 +47,7 @@ public class Auth implements OnDataFetched<String> {
 		this.location = new MutableServerLocation();
 		this.authStateDidChangeHandlers = new HashMap<>();
 		this.authStateDidFailToChangeHandlers = new HashMap<>();
+		this.persistentStore = null;
 	}
 	
 	private static @Nullable Auth _instance = null;
@@ -78,6 +84,33 @@ public class Auth implements OnDataFetched<String> {
 		return loginError;
 	}
 	
+	public void setPersistentStore(@Nullable PersistentStore store) {
+		this.persistentStore = store;
+		loadStoredAuthFromPersistentStore();
+	}
+	
+	
+	
+	
+	private void loadStoredAuthFromPersistentStore() {
+		if (persistentStore == null) {
+			return;
+		}
+		if (authToken == null) {
+			authToken = persistentStore.getString(STORED_AUTH_TOKEN);
+		}
+		if (personID == null) {
+			personID = persistentStore.getString(STORED_PERSON_ID);
+		}
+	}
+	
+	private void saveAuthDetailsToPersistentStore() {
+		if (persistentStore != null) {
+			persistentStore.putString(STORED_AUTH_TOKEN, authToken);
+			persistentStore.putString(STORED_PERSON_ID, personID);
+		}
+	}
+	
 	
 	
 	
@@ -89,6 +122,9 @@ public class Auth implements OnDataFetched<String> {
 		
 		this.authToken = authToken;
 		this.personID = personID;
+		
+		saveAuthDetailsToPersistentStore();
+		
 		if (shouldCallHandlers) {
 			for (NullableValueHandler<String> h : authStateDidChangeHandlers.values()) {
 				h.call(authToken);

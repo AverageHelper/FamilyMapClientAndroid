@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 		
 		keyValueStore = new KeyValueStore(this);
 		restoreModelState(keyValueStore);
+		auth.setPersistentStore(keyValueStore);
 		
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = findViewById(R.id.toolbar);

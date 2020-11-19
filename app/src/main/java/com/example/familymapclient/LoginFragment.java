@@ -295,8 +295,7 @@ public class LoginFragment extends Fragment {
 	}
 	
 	
-	private @Nullable
-	PersonRequester personFetch = null;
+	private @Nullable PersonRequester personFetch = null;
 	
 	private void fetchPerson() {
 		if (auth.getPersonID() == null || auth.getAuthToken() == null) {

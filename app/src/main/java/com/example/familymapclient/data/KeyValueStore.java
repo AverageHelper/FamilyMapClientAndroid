@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 /**
  * A utility class that facilitates access to the shared preferences file.
  */
-public class KeyValueStore {
+public class KeyValueStore implements PersistentStore {
 	
 	private final @NonNull Context context;
 	
@@ -33,6 +33,7 @@ public class KeyValueStore {
 	
 	// ** Read
 	
+	@Override
 	public boolean containsKey(@NonNull String key) {
 		return KeyValueStore.containsKey(context, key);
 	}
@@ -43,6 +44,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public @Nullable String getString(@NonNull String key) {
 		return KeyValueStore.getString(context, key);
 	}
@@ -60,6 +62,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public @Nullable Integer getInt(@NonNull String key) {
 		return KeyValueStore.getInt(context, key);
 	}
@@ -80,6 +83,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public boolean getBoolean(@NonNull String key, boolean defaultValue) {
 		Boolean result = KeyValueStore.getBoolean(context, key);
 		if (result == null) {
@@ -88,6 +92,7 @@ public class KeyValueStore {
 		return result;
 	}
 	
+	@Override
 	public @Nullable Boolean getBoolean(@NonNull String key) {
 		return KeyValueStore.getBoolean(context, key);
 	}
@@ -108,6 +113,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public @Nullable Float getFloat(@NonNull String key) {
 		return KeyValueStore.getFloat(context, key);
 	}
@@ -128,6 +134,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public @Nullable Long getLong(@NonNull String key) {
 		return KeyValueStore.getLong(context, key);
 	}
@@ -148,6 +155,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public @Nullable Set<String> getStringSet(@NonNull String key) {
 		return KeyValueStore.getStringSet(context, key);
 	}
@@ -173,6 +181,7 @@ public class KeyValueStore {
 	
 	// ** Write
 	
+	@Override
 	public void remove(@NonNull String key) {
 		KeyValueStore.remove(context, key);
 	}
@@ -185,6 +194,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public void putString(@NonNull String key, @Nullable String value) {
 		KeyValueStore.putString(context, key, value);
 	}
@@ -204,6 +214,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public void putInt(@NonNull String key, @Nullable Integer value) {
 		KeyValueStore.putInt(context, key, value);
 	}
@@ -224,6 +235,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public void putBoolean(@NonNull String key, @Nullable Boolean value) {
 		KeyValueStore.putBoolean(context, key, value);
 	}
@@ -244,6 +256,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public void putFloat(@NonNull String key, @Nullable Float value) {
 		KeyValueStore.putFloat(context, key, value);
 	}
@@ -264,6 +277,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public void putLong(@NonNull String key, @Nullable Long value) {
 		KeyValueStore.putLong(context, key, value);
 	}
@@ -284,6 +298,7 @@ public class KeyValueStore {
 	}
 	
 	
+	@Override
 	public void putStringSet(@NonNull String key, @Nullable Set<String> value) {
 		KeyValueStore.putStringSet(context, key, value);
 	}
