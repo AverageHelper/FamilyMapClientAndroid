@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -57,6 +58,7 @@ public class LoginFragment extends Fragment {
 	private EditText lastNameField;
 	private EditText emailField;
 	private RadioGroup genderField;
+	private ProgressBar loadingIndicator;
 	
 	private Button loginButton;
 	private Button registerButton;
@@ -205,6 +207,7 @@ public class LoginFragment extends Fragment {
 	private void findButtons(@NonNull View view) {
 		loginButton = view.findViewById(R.id.button_sign_in);
 		registerButton = view.findViewById(R.id.button_register);
+		loadingIndicator = view.findViewById(R.id.loading_indicator);
 	}
 	
 	private void connectButtons() {
@@ -215,13 +218,19 @@ public class LoginFragment extends Fragment {
 	
 	
 	private void updateButtonActivity() {
+		loadingIndicator.setVisibility(auth.isRunning()
+			? View.VISIBLE
+			: View.GONE
+		);
 		loginButton.setEnabled(
+			!auth.isRunning() &&
 			!hostName.isEmpty() &&
 				!portNumber.isEmpty() &&
 				!username.isEmpty() &&
 				!password.isEmpty()
 		);
 		registerButton.setEnabled(
+			!auth.isRunning() &&
 			!hostName.isEmpty() &&
 				!portNumber.isEmpty() &&
 				!username.isEmpty() &&
@@ -234,6 +243,7 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void handleAuthChange(@Nullable String authToken) {
+		updateButtonActivity();
 		if (authToken != null) {
 			// Signed in
 			fetchPerson();
@@ -244,6 +254,7 @@ public class LoginFragment extends Fragment {
 	}
 	
 	private void handleAsyncFailure(@NonNull Throwable error) {
+		updateButtonActivity();
 		if (error instanceof LoginException) {
 			LoginException e = (LoginException) error;
 			presentSnackbar(e.getReason().getMessage(getActivity()));
@@ -284,6 +295,7 @@ public class LoginFragment extends Fragment {
 		try {
 			updateServerLocation();
 			auth.signIn(username, password);
+			updateButtonActivity();
 			
 		} catch (LoginException e) {
 			handleAsyncFailure(e);
@@ -294,6 +306,7 @@ public class LoginFragment extends Fragment {
 		try {
 			updateServerLocation();
 			auth.register(username, password, email, firstName, lastName, gender);
+			updateButtonActivity();
 			
 		} catch (RegisterException e) {
 			handleAsyncFailure(e);
