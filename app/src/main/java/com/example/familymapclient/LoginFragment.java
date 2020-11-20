@@ -33,10 +33,10 @@ import model.Gender;
 public class LoginFragment extends Fragment {
 	
 	public Auth auth = Auth.shared();
-	@Nullable Integer signedInHandler = null;
-	@Nullable Integer loginFailureHandler = null;
+	private @Nullable Integer signedInHandler = null;
+	private @Nullable Integer loginFailureHandler = null;
 	
-	public PersonCache personCache = PersonCache.shared();
+	private final PersonCache personCache = PersonCache.shared();
 	
 	private @NonNull String hostName = "";
 	private @NonNull String portNumber = "";
@@ -69,6 +69,12 @@ public class LoginFragment extends Fragment {
 	) {
 		// Inflate the layout for this fragment
 		return inflater.inflate(R.layout.fragment_login, container, false);
+	}
+	
+	@Override
+	public void onDestroy() {
+		prepareForNavigation();
+		super.onDestroy();
 	}
 	
 	public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
