@@ -37,6 +37,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	private MapView mapView;
 	private @Nullable GoogleMap map;
 	
+	
+	// ** Lifecycle Events
+	
 	@Override
 	public View onCreateView(
 		@NonNull LayoutInflater inflater,
@@ -137,6 +140,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
+	
+	// ** Map Lifecycle
+	
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		this.map = googleMap;
@@ -164,13 +170,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		map.clear();
 		// Add markers and lines
 		
+		
 		LatLng sydney = new LatLng(-34, 151);
 		map.addMarker(new MarkerOptions().position(sydney).title("Sydney"));
 		map.animateCamera(CameraUpdateFactory.newLatLngZoom(sydney, 10));
 	}
 	
 	
-	
+	// ** Utility
 	
 	private void prepareForNavigation() {
 		if (signedOutHandler != null) {
