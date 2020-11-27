@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	public static final String KEY_SERVER_HOST_NAME = "KEY_SERVER_HOST_NAME";
 	public static final String KEY_SERVER_PORT = "KEY_SERVER_PORT";
 	public static final String KEY_SERVER_USES_HTTPS = "KEY_SERVER_USES_HTTPS";
+	public static final int REQUEST_CODE_LOG_OUT = 0;
 	
 	private final Auth auth = Auth.shared();
 	@Nullable Integer authStateHandler = null;
@@ -91,6 +92,29 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 		return super.onOptionsItemSelected(item);
 	}
 	
+	
+	private boolean shouldLogOut = false;
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+		if (requestCode == REQUEST_CODE_LOG_OUT && data != null) {
+			shouldLogOut = data.getBooleanExtra(SettingsActivity.SHOULD_LOG_OUT_KEY, false);
+			return;
+		}
+		
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+	@Override
+	protected void onResume() {
+		if (shouldLogOut) {
+			auth.logOut();
+			shouldLogOut = false;
+		}
+		
+		super.onResume();
+	}
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -152,6 +176,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	
 	private void startSettingsActivity() {
 		Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
-		startActivity(settings);
+		startActivityForResult(settings, REQUEST_CODE_LOG_OUT);
 	}
 }

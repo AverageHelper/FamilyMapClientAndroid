@@ -1,5 +1,7 @@
 package com.example.familymapclient;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -11,7 +13,8 @@ import androidx.preference.PreferenceFragmentCompat;
 
 public class SettingsActivity extends AppCompatActivity {
 	
-	public static final String RESPONSE_KEY = "response";
+	public static final String SHOULD_LOG_OUT_KEY =
+		"com.example.familymapclient.settings.shouldLogOut";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +52,22 @@ public class SettingsActivity extends AppCompatActivity {
 		@Override
 		public boolean onPreferenceTreeClick(Preference preference) {
 			if (preference.getKey().equals(getString(R.string.preference_action_log_out))) {
+				setShouldLogOutResult();
 				if (getActivity() != null) {
-					getActivity().getIntent().putExtra(RESPONSE_KEY, SettingsActivityResponse.SHOULD_LOG_OUT);
 					getActivity().finish();
 				}
 				return true;
 			}
 			
 			return super.onPreferenceTreeClick(preference);
+		}
+		
+		private void setShouldLogOutResult() {
+			if (getActivity() != null) {
+				Intent data = new Intent();
+				data.putExtra(SHOULD_LOG_OUT_KEY, true);
+				getActivity().setResult(Activity.RESULT_OK, data);
+			}
 		}
 	}
 }
