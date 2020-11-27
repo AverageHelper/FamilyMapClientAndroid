@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.familymapclient.auth.Auth;
@@ -21,9 +24,13 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import model.Event;
+import model.Gender;
+import model.Person;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
@@ -35,7 +42,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	private final EventCache eventCache = EventCache.shared();
 	
 	private MapView mapView;
-	private @Nullable GoogleMap map;
+	private @Nullable GoogleMap map = null;
+	private ConstraintLayout imageContainer;
+	private ProgressBar loadingIndicator;
+	private ImageView femaleImage;
+	private ImageView maleImage;
+	private TextView footerText;
+	
+	private @Nullable Event selectedEvent = null;
+	private @Nullable Person personForEvent = null;
 	
 	
 	// ** Lifecycle Events
@@ -64,6 +79,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		setupCacheListeners();
 		
 		findMapView(view, savedInstanceState);
+		findFooterViews(view);
 		
 		if (!auth.isSignedIn()) {
 			navigateToLoginFragment();
@@ -71,6 +87,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		initializeMaps();
 		mapView.getMapAsync(this);
+		
+		setEvent(null);
 	}
 	
 	private void setupAuthListeners() {
@@ -89,6 +107,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	private void findMapView(@NonNull View view, Bundle savedInstanceState) {
 		mapView = view.findViewById(R.id.map_view);
 		mapView.onCreate(savedInstanceState);
+	}
+	
+	private void findFooterViews(@NonNull View view) {
+		imageContainer = view.findViewById(R.id.image_container);
+		loadingIndicator = view.findViewById(R.id.image_loading_indicator);
+		femaleImage = view.findViewById(R.id.image_view_female);
+		maleImage = view.findViewById(R.id.image_view_male);
+		footerText = view.findViewById(R.id.footer_text_view);
 	}
 	
 	private void initializeMaps() {
@@ -137,6 +163,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 						presentSnackbar(getString(R.string.maps_error_unknown));
 				}
 			}
+		}
+	}
+	
+	
+	// ** Events
+	
+	private void setEvent(@Nullable Event event) {
+		this.selectedEvent = event;
+		
+		if (event == null) {
+			footerText.setText(R.string.event_navigation_hint);
+			setPerson(null);
+			imageContainer.setVisibility(View.GONE);
+			loadingIndicator.setVisibility(View.GONE);
+			return;
+		}
+		
+		imageContainer.setVisibility(View.VISIBLE);
+		Person person = personCache.getValueWithID(event.getPersonID());
+		setPerson(person);
+	}
+	
+	private void setPerson(@Nullable Person person) {
+		this.personForEvent = person;
+		
+		if (person == null) {
+			loadingIndicator.setVisibility(selectedEvent != null ? View.VISIBLE : View.GONE);
+			maleImage.setVisibility(View.GONE);
+			femaleImage.setVisibility(View.GONE);
+		} else {
+			loadingIndicator.setVisibility(View.GONE);
+			maleImage.setVisibility(person.getGender().equals(Gender.MALE) ? View.VISIBLE : View.GONE);
+			femaleImage.setVisibility(person.getGender().equals(Gender.FEMALE) ? View.VISIBLE : View.GONE);
 		}
 	}
 	
