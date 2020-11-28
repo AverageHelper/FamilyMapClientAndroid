@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.PersonCache;
+import com.example.familymapclient.data.fetch.PersonRequester;
+import com.example.familymapclient.transport.ServerLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,6 +22,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -184,6 +187,56 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	}
 	
 	
+	// ** Persons
+	
+	private @Nullable PersonRequester personFetch = null;
+	
+	private void fetchPerson(@NonNull String personID) {
+		if (auth.getAuthToken() == null) {
+			return;
+		}
+		ServerLocation server = new ServerLocation(
+			auth.getHostname(),
+			auth.getPortNumber(),
+			auth.usesSecureProtocol()
+		);
+		personFetch = personCache.fetchPersonWithID(
+			server,
+			personID,
+			auth.getAuthToken(),
+			person -> {
+				if (personFetch != null) {
+					personFetch = null;
+					setPerson(person);
+				}
+			},
+			error -> {
+				handleAsyncFailure(error);
+				personFetch = null;
+			}
+		);
+	}
+	
+	private void handleAsyncFailure(@NonNull Throwable error) {
+		// Toast the error message
+		if (error instanceof Exception) {
+			Exception e = (Exception) error;
+			if (e.getMessage() != null) {
+				presentSnackbar(e.getMessage());
+			} else {
+				presentSnackbar(e.toString());
+			}
+			
+		} else {
+			presentSnackbar(error.toString());
+		}
+		
+		// Stop our async handler and deselect the event
+		this.personFetch = null;
+		setEvent(null);
+	}
+	
+	
 	// ** Events
 	
 	private void setEvent(@Nullable Event event) {
@@ -197,8 +250,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 		
 		imageContainer.setVisibility(View.VISIBLE);
-		Person person = personCache.getValueWithID(event.getPersonID());
-		setPerson(person);
+		
+		// Select the person record if we have it, or fetch it if we don't
+		String personID = event.getPersonID();
+		@Nullable Person person = personCache.getValueWithID(personID);
+		
+		if (person == null) {
+			fetchPerson(personID);
+		} else {
+			setPerson(person);
+		}
 	}
 	
 	private void setPerson(@Nullable Person person) {
@@ -238,18 +299,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	// ** Map Lifecycle
 	
+	private boolean onMapMarkerTapped(@NonNull Marker marker) {
+		if (map == null) {
+			return false;
+		}
+		
+		map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+		if (marker.getTag() != null) { // The event is stored in the tag
+			setEvent((Event) marker.getTag());
+			return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		this.map = googleMap;
-		this.map.setOnMarkerClickListener(marker -> {
-			map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 10));
-			if (marker.getTag() != null) {
-				this.setEvent((Event) marker.getTag());
-				return true;
-			}
-			return false;
-		});
-//		presentToast("Google Maps loaded.");
+		this.map.setOnMarkerClickListener(this::onMapMarkerTapped);
 		updateMapContents();
 	}
 	
