@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.familymapclient.auth.Auth;
+import com.example.familymapclient.data.Color;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.fetch.PersonRequester;
@@ -21,10 +21,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -285,7 +288,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 					R.string.arg_event_description,
 					person.getFirstName(),
 					person.getLastName(),
-					selectedEvent.getEventType(),
+					selectedEvent.getEventType().toUpperCase(Locale.ROOT),
 					selectedEvent.getCity(),
 					selectedEvent.getCountry(),
 					selectedEvent.getYear()
@@ -323,18 +326,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		updateMapContents();
 	}
 	
-	@Override
-	public void onDestroy() {
-		mapView.onDestroy();
-		super.onDestroy();
-	}
-	
-	@Override
-	public void onLowMemory() {
-		mapView.onLowMemory();
-		super.onLowMemory();
-	}
-	
 	private void updateMapContents() {
 		if (this.map == null) {
 			return;
@@ -348,9 +339,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 				break;
 			}
 			LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
-			map.addMarker(new MarkerOptions().position(location))
-				.setTag(event);
+			Color color = eventCache.colorForEvent(event);
+			
+			MarkerOptions options = new MarkerOptions()
+				.position(location)
+				.icon(BitmapDescriptorFactory.defaultMarker(color.value()));
+			
+			Marker marker = map.addMarker(options);
+			marker.setTag(event);
 		}
+	}
+	
+	@Override
+	public void onDestroy() {
+		mapView.onDestroy();
+		super.onDestroy();
+	}
+	
+	@Override
+	public void onLowMemory() {
+		mapView.onLowMemory();
+		super.onLowMemory();
 	}
 	
 	
