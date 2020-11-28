@@ -11,6 +11,8 @@
     <string name="settings_activity_label">Settings</string>
     <string name="event_navigation_hint">Click on a marker to see event details</string>
 
+    <string name="loading_state_fetching_events">Fetching events...</string>
+
     <!-- Login -->
     <string name="login_fragment_label_server_host">Server Host</string>
     <string name="login_fragment_label_server_port">Server Port</string>
@@ -48,8 +50,6 @@
     <string name="maps_error_service_not_found">Google Play Services were not found.</string>
     <string name="maps_error_timeout">The connection timed out while trying to initialize.</string>
     <string name="maps_error_unknown">Unknown error occurred while trying to load maps.</string>
-
-    <!--    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>-->
 
     <!-- Image Descriptions -->
     <string name="icon_description_female">Female</string>
@@ -93,4 +93,8 @@
     <!-- Account Preferences -->
     <string name="preference_title_account_logout">Log Out</string>
     <string name="preference_summary_account_logout">Return to login screen</string>
+
+    <!-- Argument Strings -->
+    <string name="arg_full_name">%1$s %2$s</string>
+    <string name="arg_event_description">%1$s %2$s\n%3$s: %4$s, %5$s (%6$d)</string>
 </resources>

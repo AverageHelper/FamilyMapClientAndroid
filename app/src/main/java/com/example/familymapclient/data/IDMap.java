@@ -66,4 +66,11 @@ public class IDMap<ID, Element extends Identifiable<ID>> {
 	public @Nullable Element removeValueWithID(@NonNull ID id) {
 		return values.remove(id);
 	}
+	
+	/**
+	 * Returns a Collection view of the values contained in this map.
+	 */
+	public @NonNull Collection<Element> values() {
+		return this.values.values();
+	}
 }

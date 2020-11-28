@@ -29,7 +29,7 @@ public class PersonRequester implements OnDataFetched<String> {
 	private final @NonNull String authToken;
 	
 	/**
-	 * Creates a new <code>FuturePerson</code> object.
+	 * Creates a new <code>PersonRequester</code> object.
 	 * @param location The server's protocol, hostname, and port number.
 	 * @param personID The ID of the person to fetch.
 	 * @param authToken The user's auth token.
@@ -50,6 +50,7 @@ public class PersonRequester implements OnDataFetched<String> {
 		this.onFailure = onFailure;
 		this.person = null;
 		this.fetchError = null;
+		this.runner = null;
 	}
 	
 	

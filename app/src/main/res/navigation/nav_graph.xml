@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/LoginFragment">
+    app:startDestination="@id/LoadingFragment">
 
     <fragment
         android:id="@+id/LoginFragment"
@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_LoginFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_LoginFragment_to_LoadingFragment"
+            app:destination="@id/LoadingFragment" />
     </fragment>
     <fragment
         android:id="@+id/MapFragment"
@@ -24,5 +27,17 @@
         <action
             android:id="@+id/action_MapFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/LoadingFragment"
+        android:name="com.example.familymapclient.LoadingFragment"
+        android:label="fragment_loading"
+        tools:layout="@layout/fragment_loading" >
+        <action
+            android:id="@+id/action_LoadingFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+        <action
+            android:id="@+id/action_LoadingFragment_to_MapFragment"
+            app:destination="@id/MapFragment" />
     </fragment>
 </navigation>

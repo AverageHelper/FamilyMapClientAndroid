@@ -72,8 +72,7 @@ public class PersonCache extends IDMap<String, Person> {
 	
 	// ** Fetching Persons
 	
-	public @NonNull
-	PersonRequester fetchPersonWithID(
+	public @NonNull PersonRequester fetchPersonWithID(
 		@NonNull ServerLocation location,
 		@NonNull String personID,
 		@NonNull String authToken,

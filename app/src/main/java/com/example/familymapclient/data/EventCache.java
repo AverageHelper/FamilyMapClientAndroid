@@ -1,8 +1,11 @@
 package com.example.familymapclient.data;
 
 import com.example.familymapclient.auth.NonNullValueHandler;
+import com.example.familymapclient.data.fetch.EventsRequester;
+import com.example.familymapclient.transport.ServerLocation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,5 +82,29 @@ public class EventCache extends IDMap<String, Event> {
 			eventTypes.remove(event.getEventType());
 		}
 		return event;
+	}
+	
+	
+	// ** Fetching Events
+	
+	public @NonNull EventsRequester fetchAllEvents(
+		@NonNull ServerLocation location,
+		@NonNull String authToken,
+		@NonNull NonNullValueHandler<List<Event>> onSuccess,
+		@NonNull NonNullValueHandler<Throwable> onFailure
+	) {
+		EventsRequester responder =
+			new EventsRequester(
+				location,
+				authToken,
+				events -> {
+					// Add the new Person to the cache
+					this.addAll(events);
+					onSuccess.call(events);
+				},
+				onFailure
+			);
+		responder.start();
+		return responder;
 	}
 }

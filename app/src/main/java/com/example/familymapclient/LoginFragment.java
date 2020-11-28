@@ -9,12 +9,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.example.familymapclient.auth.Auth;
-import com.example.familymapclient.data.PersonCache;
-import com.example.familymapclient.data.fetch.PersonRequester;
-import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.register.RegisterException;
 import com.example.familymapclient.ui.CheckboxListener;
@@ -36,8 +32,6 @@ public class LoginFragment extends Fragment {
 	public Auth auth = Auth.shared();
 	private @Nullable Integer signedInHandler = null;
 	private @Nullable Integer loginFailureHandler = null;
-	
-	private final PersonCache personCache = PersonCache.shared();
 	
 	private @NonNull String hostName = "";
 	private @NonNull String portNumber = "";
@@ -73,36 +67,31 @@ public class LoginFragment extends Fragment {
 		return inflater.inflate(R.layout.fragment_login, container, false);
 	}
 	
-	@Override
-	public void onDestroy() {
-		prepareForNavigation();
-		super.onDestroy();
-	}
-	
 	public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		
-		setupAuthListeners();
 		
 		findInputFields(view);
 		connectInputFields();
 		findButtons(view);
 		connectButtons();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
 		
+		setupAuthListeners();
 		prefillInputFields();
 		updateButtonActivity();
 		
 		if (auth.isSignedIn()) {
-			navigateToMapFragment();
+			// Signed in. Get out of here.
+			navigateToLoadingFragment();
 		}
 	}
 	
-	private void setupAuthListeners() {
-		signedInHandler = auth.addAuthStateDidChangeHandler(this::handleAuthChange);
-		loginFailureHandler = auth.addFailureHandler(this::handleAsyncFailure);
-	}
-	
-	private void prepareForNavigation() {
+	@Override
+	public void onStop() {
 		if (signedInHandler != null) {
 			auth.removeAuthStateDidChangeHandler(signedInHandler);
 			signedInHandler = null;
@@ -111,12 +100,12 @@ public class LoginFragment extends Fragment {
 			auth.removeFailureHandler(loginFailureHandler);
 			loginFailureHandler = null;
 		}
+		super.onStop();
 	}
 	
-	private void navigateToMapFragment() {
-		prepareForNavigation();
-		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
-		navController.navigate(R.id.action_LoginFragment_to_MapFragment);
+	private void setupAuthListeners() {
+		signedInHandler = auth.addAuthStateDidChangeHandler(this::handleAuthChange);
+		loginFailureHandler = auth.addFailureHandler(this::handleAsyncFailure);
 	}
 	
 	private void findInputFields(@NonNull View view) {
@@ -244,12 +233,10 @@ public class LoginFragment extends Fragment {
 	
 	private void handleAuthChange(@Nullable String authToken) {
 		updateButtonActivity();
+		
 		if (authToken != null) {
-			// Signed in
-			fetchPerson();
-		} else {
-			// Signed out
-			personCache.clear();
+			// Signed in.
+			navigateToLoadingFragment();
 		}
 	}
 	
@@ -276,10 +263,6 @@ public class LoginFragment extends Fragment {
 		}
 	}
 	
-	private void presentToast(@NonNull String text) {
-		Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
-	}
-	
 	private void presentSnackbar(@NonNull String text) {
 		View view = getView();
 		if (view != null) {
@@ -290,6 +273,11 @@ public class LoginFragment extends Fragment {
 	
 	
 	// ** Actions
+	
+	private void navigateToLoadingFragment() {
+		NavController navController = NavHostFragment.findNavController(LoginFragment.this);
+		navController.navigate(R.id.action_LoginFragment_to_LoadingFragment);
+	}
 	
 	private void login() {
 		try {
@@ -311,33 +299,6 @@ public class LoginFragment extends Fragment {
 		} catch (RegisterException e) {
 			handleAsyncFailure(e);
 		}
-	}
-	
-	
-	private @Nullable PersonRequester personFetch = null;
-	
-	private void fetchPerson() {
-		if (auth.getPersonID() == null || auth.getAuthToken() == null) {
-			return;
-		}
-		personFetch = personCache.fetchPersonWithID(
-			new ServerLocation(
-				auth.getHostname(),
-				auth.getPortNumber(),
-				auth.usesSecureProtocol()
-			),
-			auth.getPersonID(),
-			auth.getAuthToken(),
-			person -> {
-				this.presentToast("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
-				this.personFetch = null;
-				this.navigateToMapFragment();
-			},
-			error -> {
-				this.handleAsyncFailure(error);
-				this.personFetch = null;
-			}
-		);
 	}
 	
 	

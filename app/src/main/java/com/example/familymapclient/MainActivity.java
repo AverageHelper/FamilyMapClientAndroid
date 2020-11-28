@@ -5,11 +5,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.familymapclient.auth.Auth;
+import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.KeyValueStore;
 import com.example.familymapclient.data.PersistentStore;
+import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.UISettings;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,8 +27,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	public static final String KEY_SERVER_USES_HTTPS = "KEY_SERVER_USES_HTTPS";
 	public static final int REQUEST_CODE_LOG_OUT = 0;
 	
+	private final PersonCache personCache = PersonCache.shared();
+	private final EventCache eventCache = EventCache.shared();
+	
 	private final Auth auth = Auth.shared();
-	@Nullable Integer authStateHandler = null;
+	private @Nullable Integer authStateHandler = null;
 	private UISettings uiSettings;
 	private PersistentStore keyValueStore;
 	
@@ -51,10 +54,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-		FloatingActionButton fab = findViewById(R.id.fab);
-		fab
-			.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-			.setAction("Action", null).show());
+//		FloatingActionButton fab = findViewById(R.id.fab);
+//		fab
+//			.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//			.setAction("Action", null).show());
 		
 		setupAuthListeners();
 	}
@@ -111,17 +114,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 			auth.logOut();
 			shouldLogOut = false;
 		}
-		
 		super.onResume();
 	}
 	
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		if (authStateHandler != null) {
 			auth.removeAuthStateDidChangeHandler(authStateHandler);
 			authStateHandler = null;
 		}
+		super.onDestroy();
 	}
 	
 	
@@ -156,7 +158,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 		// Restore server location
 		auth.setUsesSecureProtocol(savedInstanceState.getBoolean(KEY_SERVER_USES_HTTPS, false));
 		auth.setHostname(savedInstanceState.getString(KEY_SERVER_HOST_NAME));
-		auth.setPortNumber(savedInstanceState.getInt(KEY_SERVER_HOST_NAME));
+		auth.setPortNumber(savedInstanceState.getInt(KEY_SERVER_PORT));
+	}
+	
+	
+	// ** Navigation
+	
+	private void startSettingsActivity() {
+		Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
+		startActivityForResult(settings, REQUEST_CODE_LOG_OUT);
 	}
 	
 	
@@ -168,14 +178,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 			this.searchItem.setVisible(authToken != null);
 			this.settingsItem.setVisible(authToken != null);
 			this.saveModelState(this.keyValueStore);
+			
+			if (authToken == null) {
+				// Signed out. Clear caches
+				this.personCache.clear();
+				this.eventCache.clear();
+			}
 		});
 	}
 	
-	
-	// ** Navigation
-	
-	private void startSettingsActivity() {
-		Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
-		startActivityForResult(settings, REQUEST_CODE_LOG_OUT);
-	}
 }
