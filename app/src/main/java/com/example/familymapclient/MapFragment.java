@@ -254,11 +254,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		// Select the person record if we have it, or fetch it if we don't
 		String personID = event.getPersonID();
 		@Nullable Person person = personCache.getValueWithID(personID);
+		setPerson(person);
 		
 		if (person == null) {
 			fetchPerson(personID);
-		} else {
-			setPerson(person);
 		}
 	}
 	
@@ -266,7 +265,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		this.personForEvent = person;
 		
 		if (person == null) {
-			footerText.setText(R.string.event_navigation_hint);
+			if (selectedEvent == null) {
+				footerText.setText(R.string.event_navigation_hint);
+			} else {
+				footerText.setText(R.string.event_loading_hint);
+			}
 			loadingIndicator.setVisibility(selectedEvent != null ? View.VISIBLE : View.GONE);
 			maleImage.setVisibility(View.GONE);
 			femaleImage.setVisibility(View.GONE);
