@@ -108,7 +108,10 @@ public class LoadingFragment extends Fragment {
 			auth.getAuthToken(),
 			person -> {
 				if (personFetch != null) {
-					presentToast("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
+					if (!MainActivity.didWelcomeUser) {
+						presentToast("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
+						MainActivity.didWelcomeUser = true;
+					}
 					personFetch = null;
 					if (eventsFetch == null) {
 						navigateToMapFragment();

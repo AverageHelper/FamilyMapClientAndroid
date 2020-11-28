@@ -3,8 +3,8 @@ package com.example.familymapclient.data;
 import com.example.familymapclient.utilities.ArrayHelpers;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 
@@ -45,10 +45,16 @@ public enum Color {
 	}
 	
 	/**
+	 * @return All {@link Color} values as an {@link ArrayList}.
+	 */
+	public static @NonNull ArrayList<Color> allValues() {
+		return new ArrayList<>(Arrays.asList(Color.values()));
+	}
+	
+	/**
 	 * @return a random {@link Color} value.
 	 */
 	public static @NonNull Color random() {
-		List<Color> values = Arrays.asList(Color.values());
-		return ArrayHelpers.randomElementFromList(values);
+		return ArrayHelpers.randomElementFromList(Color.allValues());
 	}
 }

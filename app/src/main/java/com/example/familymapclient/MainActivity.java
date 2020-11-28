@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	
 	private final Auth auth = Auth.shared();
 	private @Nullable Integer authStateHandler = null;
+	public static boolean didWelcomeUser = false;
 	private UISettings uiSettings;
 	private PersistentStore keyValueStore;
 	

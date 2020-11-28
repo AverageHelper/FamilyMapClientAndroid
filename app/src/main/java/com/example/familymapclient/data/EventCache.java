@@ -5,7 +5,6 @@ import com.example.familymapclient.data.fetch.EventsRequester;
 import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.utilities.ArrayHelpers;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,7 @@ public class EventCache extends IDMap<String, Event> {
 		this.eventTypes = new CountedSet<>();
 		this.colorsForEvents = new HashMap<>();
 		this.cacheDidUpdateHandler = new HashMap<>();
-		this.unusedColors = new HashSet<>(Arrays.asList(Color.values()));
+		this.unusedColors = new HashSet<>(Color.allValues());
 	}
 	
 	
@@ -95,7 +94,7 @@ public class EventCache extends IDMap<String, Event> {
 	}
 	
 	private @NonNull Color randomUnusedColor() {
-		List<Color> allColors = Arrays.asList(Color.values());
+		List<Color> allColors = Color.allValues();
 		Color color = ArrayHelpers.randomElementFromList(allColors);
 		
 		while (!unusedColors.contains(color)) {
