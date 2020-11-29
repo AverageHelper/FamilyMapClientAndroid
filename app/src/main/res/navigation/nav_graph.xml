@@ -32,7 +32,7 @@
         android:id="@+id/LoadingFragment"
         android:name="com.example.familymapclient.LoadingFragment"
         android:label="fragment_loading"
-        tools:layout="@layout/fragment_loading" >
+        tools:layout="@layout/fragment_loading">
         <action
             android:id="@+id/action_LoadingFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
@@ -40,4 +40,9 @@
             android:id="@+id/action_LoadingFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/PersonDetailsFragment"
+        android:name="com.example.familymapclient.PersonDetailsFragment"
+        android:label="@string/title_activity_person"
+        tools:layout="@layout/fragment_person_details" />
 </navigation>

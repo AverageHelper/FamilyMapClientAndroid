@@ -9,9 +9,12 @@
     <string name="login_fragment_label">Login</string>
     <string name="map_fragment_label">Map</string>
     <string name="settings_activity_label">Settings</string>
+    <string name="title_activity_person">Family Map: Person Details</string>
+
     <string name="event_navigation_hint">Click on a marker to see event details</string>
     <string name="event_loading_hint">Loading person details&#8230;</string>
 
+    <!-- Loading Labels -->
     <string name="loading_state_fetching_events">Fetching events&#8230;</string>
 
     <!-- Login -->
@@ -55,6 +58,11 @@
     <!-- Image Descriptions -->
     <string name="icon_description_female">Female</string>
     <string name="icon_description_male">Male</string>
+
+    <!-- Person Details -->
+    <string name="person_first_name">First Name</string>
+    <string name="person_last_name">Last Name</string>
+    <string name="person_gender">Gender</string>
 
     <!-- Identifiers -->
     <string name="preference_file_key">com.example.familymapclient.PREFERENCE_FILE_KEY</string>

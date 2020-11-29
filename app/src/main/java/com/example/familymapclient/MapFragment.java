@@ -50,6 +50,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	private MapView mapView;
 	private @Nullable GoogleMap map = null;
 	private ConstraintLayout imageContainer;
+	private ConstraintLayout eventInfo;
 	private ProgressBar loadingIndicator;
 	private ImageView femaleImage;
 	private ImageView maleImage;
@@ -94,6 +95,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		findMapView(view, savedInstanceState);
 		findFooterViews(view);
+		attachClickListeners();
 		
 		initializeMaps();
 		mapView.getMapAsync(this);
@@ -133,11 +135,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	}
 	
 	private void findFooterViews(@NonNull View view) {
+		eventInfo = view.findViewById(R.id.event_info);
 		imageContainer = view.findViewById(R.id.image_container);
 		loadingIndicator = view.findViewById(R.id.image_loading_indicator);
 		femaleImage = view.findViewById(R.id.image_view_female);
 		maleImage = view.findViewById(R.id.image_view_male);
 		footerText = view.findViewById(R.id.footer_text_view);
+	}
+	
+	private void attachClickListeners() {
+		eventInfo.setOnClickListener(view -> {
+			if (personForEvent != null) {
+				startPersonActivity(personForEvent);
+			}
+		});
 	}
 	
 	private void initializeMaps() {
@@ -375,6 +386,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	private void navigateToLoginFragment() {
 		NavController navController = NavHostFragment.findNavController(MapFragment.this);
 		navController.navigate(R.id.action_MapFragment_to_LoginFragment);
+	}
+	
+	private void startPersonActivity(@NonNull Person person) {
+		Intent personDetails = new Intent(getActivity(), PersonActivity.class);
+		personDetails.putExtra(PersonActivity.ARG_PERSON_ID, person.getId());
+		startActivity(personDetails);
 	}
 	
 }
