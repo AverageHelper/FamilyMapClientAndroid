@@ -390,7 +390,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	private void startPersonActivity(@NonNull Person person) {
 		Intent personDetails = new Intent(getActivity(), PersonActivity.class);
-		personDetails.putExtra(PersonActivity.ARG_PERSON_ID, person.getId());
+		personDetails.putExtra(PersonActivity.ARG_PERSON_JSON, person.toJson());
 		startActivity(personDetails);
 	}
 	

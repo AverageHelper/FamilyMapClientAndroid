@@ -14,12 +14,10 @@ import model.Person;
 
 public class PersonActivity extends AppCompatActivity {
 	
-	public static final String ARG_PERSON_ID = "person_id";
+	public static final String ARG_PERSON_JSON = "person_json";
 	
 	private final PersonCache personCache = PersonCache.shared();
 	private final EventCache eventCache = EventCache.shared();
-	
-	private @Nullable Person selectedPerson = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
