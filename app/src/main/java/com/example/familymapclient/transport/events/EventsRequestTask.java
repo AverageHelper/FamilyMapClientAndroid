@@ -1,16 +1,15 @@
 package com.example.familymapclient.transport.events;
 
-import com.example.familymapclient.transport.GetRequest;
+import com.example.familymapclient.transport.GetRequestTask;
 import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RequestFailureException;
-import com.example.familymapclient.transport.RequestTask;
 import com.example.familymapclient.transport.ServerLocation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class EventsRequestTask extends RequestTask<GetRequest> {
+public class EventsRequestTask extends GetRequestTask {
 	private static final String GET_EVENT_PATH = "/event";
 	
 	private final @NonNull String authToken;

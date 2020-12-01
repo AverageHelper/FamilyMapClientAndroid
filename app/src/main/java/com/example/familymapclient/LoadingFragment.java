@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import model.Person;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,7 @@ import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.fetch.EventsRequester;
-import com.example.familymapclient.data.fetch.PersonRequester;
+import com.example.familymapclient.data.fetch.PersonsRequester;
 import com.example.familymapclient.transport.ServerLocation;
 
 /**
@@ -90,7 +91,7 @@ public class LoadingFragment extends Fragment {
 	
 	// ** Data Cache
 	
-	private @Nullable PersonRequester personFetch = null;
+	private @Nullable PersonsRequester personsFetch = null;
 	private @Nullable EventsRequester eventsFetch = null;
 	
 	private void fetchPersonAndEvents() {
@@ -102,17 +103,19 @@ public class LoadingFragment extends Fragment {
 			auth.getPortNumber(),
 			auth.usesSecureProtocol()
 		);
-		personFetch = personCache.fetchPersonWithID(
+		personsFetch = personCache.fetchAllPersons(
 			server,
-			auth.getPersonID(),
 			auth.getAuthToken(),
 			person -> {
-				if (personFetch != null) {
+				if (personsFetch != null) {
 					if (!MainActivity.didWelcomeUser) {
-						presentToast("Welcome, " + person.getFirstName() + " " + person.getLastName() + "!");
+						Person currentUser = personCache.getValueWithID(auth.getPersonID());
+						presentToast("Welcome, " +
+							currentUser.getFirstName() + " " +
+							currentUser.getLastName() + "!");
 						MainActivity.didWelcomeUser = true;
 					}
-					personFetch = null;
+					personsFetch = null;
 					if (eventsFetch == null) {
 						navigateToMapFragment();
 					}
@@ -120,7 +123,7 @@ public class LoadingFragment extends Fragment {
 			},
 			error -> {
 				handleAsyncFailure(error);
-				personFetch = null;
+				personsFetch = null;
 			}
 		);
 		eventsFetch = eventCache.fetchAllEvents(
@@ -129,7 +132,7 @@ public class LoadingFragment extends Fragment {
 			events -> {
 				if (eventsFetch != null) {
 					eventsFetch = null;
-					if (personFetch == null) {
+					if (personsFetch == null) {
 						navigateToMapFragment();
 					}
 				}
@@ -156,7 +159,7 @@ public class LoadingFragment extends Fragment {
 		}
 		
 		// Stop our async handlers and log out
-		this.personFetch = null;
+		this.personsFetch = null;
 		this.eventsFetch = null;
 		auth.logOut();
 	}

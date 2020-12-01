@@ -9,28 +9,26 @@ import com.example.familymapclient.transport.ServerLocation;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class PersonRequestTask extends GetRequestTask {
+public class PersonsRequestTask extends GetRequestTask {
 	private static final String GET_PERSON_PATH = "/person";
 	
 	private final @NonNull String authToken;
 	private final @Nullable OnDataFetched<String> listener;
 	
-	public PersonRequestTask(
+	public PersonsRequestTask(
 		@NonNull MutableServerLocation location,
-		@NonNull String personID,
 		@NonNull String authToken,
 		@Nullable OnDataFetched<String> listener
 	) {
-		this(new ServerLocation(location), personID, authToken, listener);
+		this(new ServerLocation(location), authToken, listener);
 	}
 	
-	public PersonRequestTask(
+	public PersonsRequestTask(
 		@NonNull ServerLocation location,
-		@NonNull String personID,
 		@NonNull String authToken,
 		@Nullable OnDataFetched<String> listener
 	) {
-		super(location, GET_PERSON_PATH + "/" + personID, null);
+		super(location, GET_PERSON_PATH, null);
 		this.listener = listener;
 		this.authToken = authToken;
 	}

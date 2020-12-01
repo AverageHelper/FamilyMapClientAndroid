@@ -138,18 +138,17 @@ public class EventCache extends IDMap<String, Event> {
 		@NonNull NonNullValueHandler<List<Event>> onSuccess,
 		@NonNull NonNullValueHandler<Throwable> onFailure
 	) {
-		EventsRequester responder =
-			new EventsRequester(
-				location,
-				authToken,
-				events -> {
-					// Add the new Person to the cache
-					this.addAll(events);
-					onSuccess.call(events);
-				},
-				onFailure
-			);
-		responder.start();
-		return responder;
+		EventsRequester requester = new EventsRequester(
+			location,
+			authToken,
+			events -> {
+				// Add the new events to the cache
+				this.addAll(events);
+				onSuccess.call(events);
+			},
+			onFailure
+		);
+		requester.start();
+		return requester;
 	}
 }
