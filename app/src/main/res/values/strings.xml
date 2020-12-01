@@ -63,6 +63,16 @@
     <string name="person_first_name">First Name</string>
     <string name="person_last_name">Last Name</string>
     <string name="person_gender">Gender</string>
+    <string name="person_gender_male">Male</string>
+    <string name="person_gender_female">Female</string>
+
+    <string name="person_header_life_events">Life Events</string>
+    <string name="person_header_relationships">Family</string>
+
+    <string name="person_relationship_father">Father</string>
+    <string name="person_relationship_mother">Mother</string>
+    <string name="person_relationship_spouse">Spouse</string>
+    <string name="person_relationship_child">Child</string>
 
     <!-- Identifiers -->
     <string name="preference_file_key">com.example.familymapclient.PREFERENCE_FILE_KEY</string>
