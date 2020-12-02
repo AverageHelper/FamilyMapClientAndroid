@@ -12,7 +12,9 @@ import android.widget.TextView;
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.data.Color;
 import com.example.familymapclient.data.EventCache;
+import com.example.familymapclient.data.FilterType;
 import com.example.familymapclient.data.PersonCache;
+import com.example.familymapclient.data.UISettings;
 import com.example.familymapclient.data.fetch.PersonRequester;
 import com.example.familymapclient.transport.ServerLocation;
 import com.google.android.gms.common.ConnectionResult;
@@ -99,8 +101,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		initializeMaps();
 		mapView.getMapAsync(this);
-		
-		setEvent(null);
 	}
 	
 	@Override
@@ -113,6 +113,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 			// Signed out. Get out of here.
 			navigateToLoginFragment();
 		}
+		
+		updateMapContents();
+		setEvent(null);
 	}
 	
 	@Override
@@ -337,6 +340,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		updateMapContents();
 	}
 	
+	private @NonNull UISettings getUIPreferences() {
+		MainActivity activity = (MainActivity) getActivity();
+		return activity.getUISettings();
+	}
+	
 	private void updateMapContents() {
 		if (this.map == null) {
 			return;
@@ -344,11 +352,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		map.clear();
 		
+		UISettings settings = getUIPreferences();
+		
 		// Add markers and lines
 		for (Event event : eventCache.values()) {
 			if (event.getLatitude() == null || event.getLongitude() == null) {
-				break;
+				continue;
 			}
+			
+			Person person = personCache.getValueWithID(event.getPersonID());
+			if (person != null) {
+				// Check filters
+				if (person.getGender().equals(Gender.MALE) &&
+						!settings.isFilterEnabled(FilterType.GENDER_MALE)) {
+					continue;
+				}
+				
+				if (person.getGender().equals(Gender.FEMALE) &&
+						!settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
+					continue;
+				}
+			}
+			
 			LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
 			Color color = eventCache.colorForEvent(event);
 			

@@ -33,11 +33,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	private final Auth auth = Auth.shared();
 	private @Nullable Integer authStateHandler = null;
 	public static boolean didWelcomeUser = false;
-	private UISettings uiSettings;
+	private @Nullable UISettings uiSettings = null;
 	private PersistentStore keyValueStore;
 	
 	private MenuItem searchItem;
 	private MenuItem settingsItem;
+	
+	public @NonNull UISettings getUISettings() {
+		if (uiSettings == null) {
+			return new UISettings();
+		}
+		return uiSettings;
+	}
 	
 	
 	// ** Lifecycle Events
