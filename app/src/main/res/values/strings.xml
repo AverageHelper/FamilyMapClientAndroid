@@ -16,6 +16,7 @@
 
     <!-- Loading Labels -->
     <string name="loading_state_fetching_events">Fetching events&#8230;</string>
+    <string name="loading_state_fetching_persons">Fetching persons&#8230;</string>
 
     <!-- Login -->
     <string name="login_fragment_label_server_host">Server Host</string>

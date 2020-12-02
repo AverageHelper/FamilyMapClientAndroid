@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.example.familymapclient.data.Color;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.PersonCache;
+import com.example.familymapclient.data.Relationship;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,13 +36,10 @@ public class PersonDetailsFragment extends Fragment {
 	
 	private RecyclerView detailsList;
 	private ExpandableListView lifeEventsList;
-	private ExpandableListView familyList;
 	
-	private final LifeEventsAdapter lifeEventsAdapter = new LifeEventsAdapter();
+	private final RelatedRecordsAdapter relatedRecordsAdapter = new RelatedRecordsAdapter();
 	
 	private @Nullable Person selectedPerson = null;
-	private @Nullable List<Event> lifeEvents = null;
-	private @Nullable List<Person> relationships = null;
 	
 	private final PersonCache personCache = PersonCache.shared();
 	private final EventCache eventCache = EventCache.shared();
@@ -62,8 +60,7 @@ public class PersonDetailsFragment extends Fragment {
 		getActivityArguments();
 		findListViews(view);
 		setupDetailsList();
-		setupEventsList();
-		setupFamilyList();
+		setupConnectedRecordsList();
 		fetchLifeEvents();
 		fetchRelationships();
 	}
@@ -82,45 +79,45 @@ public class PersonDetailsFragment extends Fragment {
 	private void findListViews(@NonNull View view) {
 		detailsList = view.findViewById(R.id.details_list);
 		lifeEventsList = view.findViewById(R.id.life_events_list);
-		familyList = view.findViewById(R.id.family_list);
 	}
 	
 	private void setupDetailsList() {
+		addDividersToList(detailsList);
+		detailsList.setAdapter(new PersonDetailAdapter(selectedPerson));
+	}
+	
+	private void setupConnectedRecordsList() {
+		lifeEventsList.setAdapter(relatedRecordsAdapter);
+		lifeEventsList.expandGroup(0);
+		lifeEventsList.expandGroup(1);
+	}
+	
+	
+	private void addDividersToList(@NonNull RecyclerView listView) {
 		if (getActivity() != null) {
 			LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
 			DividerItemDecoration dividerItemDecoration =
-				new DividerItemDecoration(detailsList.getContext(), layoutManager.getOrientation());
+				new DividerItemDecoration(listView.getContext(), layoutManager.getOrientation());
 			
-			detailsList.addItemDecoration(dividerItemDecoration);
-			detailsList.setLayoutManager(layoutManager);
-			detailsList.setAdapter(new PersonDetailAdapter(selectedPerson));
+			listView.addItemDecoration(dividerItemDecoration);
+			listView.setLayoutManager(layoutManager);
 		}
 	}
 	
-	private void setupEventsList() {
-		lifeEventsList.setAdapter(lifeEventsAdapter);
-	}
 	
-	private void setupFamilyList() {
-	
-	}
 	
 	private void fetchLifeEvents() {
-		// get all events related to this person
 		if (selectedPerson != null) {
-			lifeEvents = new ArrayList<>();
-			for (Event event : eventCache.values()) {
-				if (event.getPersonID().equals(selectedPerson.getId())) {
-					lifeEvents.add(event);
-				}
-			}
-//			lifeEvents = personCache.eventsForPerson(selectedPerson);
-			lifeEventsAdapter.setEvents(new HashSet<>(lifeEvents));
+			Set<Event> events = eventCache.lifeEventsForPerson(selectedPerson);
+			relatedRecordsAdapter.setEvents(events);
 		}
 	}
 	
 	private void fetchRelationships() {
-		// get all persons related to this person
+		if (selectedPerson != null) {
+			Set<Relationship> relationships = personCache.relationshipsForPerson(selectedPerson);
+			relatedRecordsAdapter.setRelationships(relationships);
+		}
 	}
 	
 	private @NonNull String stringForGender(@NonNull Gender gender) {
@@ -186,13 +183,23 @@ public class PersonDetailsFragment extends Fragment {
 		
 	}
 	
-	private class LifeEventsAdapter extends BaseExpandableListAdapter {
+	private class RelatedRecordsAdapter extends BaseExpandableListAdapter {
 		
 		private final Set<DataSetObserver> observers = new HashSet<>();
 		private @Nullable Set<Event> events = null;
+		private @Nullable Set<Relationship> relationships = null;
 		
 		public void setEvents(@Nullable Set<Event> events) {
 			this.events = events;
+			sendUpdates();
+		}
+		
+		public void setRelationships(@Nullable Set<Relationship> relationships) {
+			this.relationships = relationships;
+			sendUpdates();
+		}
+		
+		private void sendUpdates() {
 			for (DataSetObserver observer : observers) {
 				observer.onChanged();
 			}
@@ -203,6 +210,13 @@ public class PersonDetailsFragment extends Fragment {
 				return null;
 			}
 			return new ArrayList<>(events);
+		}
+		
+		private @Nullable List<Relationship> getSortedRelationships() {
+			if (relationships == null) {
+				return null;
+			}
+			return new ArrayList<>(relationships);
 		}
 		
 		@Override
@@ -217,28 +231,63 @@ public class PersonDetailsFragment extends Fragment {
 		
 		@Override
 		public int getGroupCount() {
-			return 1;
+			return 2;
 		}
 		
 		@Override
 		public int getChildrenCount(int groupPosition) {
-			if (events == null) {
-				return 0;
+			switch (groupPosition) {
+				case 0: // Life Events
+					if (events == null) {
+						return 0;
+					}
+					return events.size();
+					
+				case 1: // Family
+					if (relationships == null) {
+						return 0;
+					}
+					return relationships.size();
+					
+				default:
+					return 0;
 			}
-			return events.size();
 		}
 		
 		@Override
-		public Object getGroup(int groupPosition) {
-			return null;
+		public @NonNull String getGroup(int groupPosition) {
+			switch (groupPosition) {
+				case 0:
+					return getString(events == null
+						? R.string.loading_state_fetching_events
+						: R.string.person_header_life_events);
+				case 1:
+					return getString(relationships == null
+						? R.string.loading_state_fetching_persons
+						: R.string.person_header_relationships);
+				default:
+					return "Group";
+			}
 		}
 		
 		@Override
-		public @Nullable Event getChild(int groupPosition, int childPosition) {
-			if (getSortedEvents() == null) {
-				return null;
+		public @Nullable Object getChild(int groupPosition, int childPosition) {
+			switch (groupPosition) {
+				case 0: // Life Events
+					if (getSortedEvents() == null) {
+						return null;
+					}
+					return getSortedEvents().get(childPosition);
+					
+				case 1: // Family
+					if (getSortedRelationships() == null) {
+						return null;
+					}
+					return getSortedRelationships().get(childPosition);
+					
+				default:
+					return null;
 			}
-			return getSortedEvents().get(childPosition);
 		}
 		
 		@Override
@@ -248,10 +297,20 @@ public class PersonDetailsFragment extends Fragment {
 		
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			if (events == null) {
+			@Nullable Object child = getChild(groupPosition, childPosition);
+			if (child == null) {
 				return -1;
+				
+			} else if (child.getClass().equals(Event.class)) {
+				Event event = (Event) child;
+				return event.getId().hashCode();
+				
+			} else if (child.getClass().equals(Relationship.class)) {
+				Relationship relationship = (Relationship) child;
+				return relationship.getSubject().getId().hashCode();
 			}
-			return getSortedEvents().get(childPosition).getId().hashCode();
+			
+			return -1;
 		}
 		
 		@Override
@@ -270,11 +329,7 @@ public class PersonDetailsFragment extends Fragment {
 			}
 			
 			TextView titleLabel = headerView.findViewById(R.id.title_label);
-			titleLabel.setText(
-				events == null
-					? R.string.loading_state_fetching_events
-					: R.string.person_header_life_events
-			);
+			titleLabel.setText(getGroup(groupPosition));
 			
 			return headerView;
 		}
@@ -293,8 +348,14 @@ public class PersonDetailsFragment extends Fragment {
 			TextView detailLabel = cell.findViewById(R.id.detail_label);
 			ImageView imageView = cell.findViewById(R.id.image_view);
 			
-			Event event = getChild(groupPosition, childPosition);
-			if (event != null) {
+			@Nullable Object child = getChild(groupPosition, childPosition);
+			
+			if (child == null) {
+				return cell;
+			}
+			
+			if (child.getClass().equals(Event.class)) {
+				Event event = (Event) child;
 				Person person = personCache.getValueWithID(event.getPersonID());
 				
 				titleLabel.setText(getString(
@@ -315,6 +376,47 @@ public class PersonDetailsFragment extends Fragment {
 						person.getLastName()
 					));
 				}
+				
+			} else if (child.getClass().equals(Relationship.class)) {
+				Relationship relationship = (Relationship) child;
+				Person person = relationship.getOther();
+				
+				titleLabel.setText(getString(
+					R.string.arg_full_name,
+					person.getFirstName(),
+					person.getLastName()
+				));
+				
+				switch (relationship.getRelationshipType()) {
+					case FATHER:
+						detailLabel.setText(R.string.person_relationship_father);
+						break;
+						
+					case MOTHER:
+						detailLabel.setText(R.string.person_relationship_mother);
+						break;
+						
+					case SPOUSE:
+						detailLabel.setText(R.string.person_relationship_spouse);
+						break;
+						
+					case CHILD:
+						detailLabel.setText(R.string.person_relationship_child);
+						break;
+						
+					default:
+						detailLabel.setText(relationship.getRelationshipType().name());
+						break;
+				}
+				
+				switch (person.getGender()) {
+					case MALE:
+						imageView.setImageResource(R.drawable.ic_iconmonstr_male);
+						break;
+					case FEMALE:
+						imageView.setImageResource(R.drawable.ic_iconmonstr_female);
+						break;
+				}
 			}
 			
 			return cell;
@@ -327,12 +429,13 @@ public class PersonDetailsFragment extends Fragment {
 		
 		@Override
 		public boolean areAllItemsEnabled() {
-			return events != null;
+			return events != null && relationships != null;
 		}
 		
 		@Override
 		public boolean isEmpty() {
-			return events == null || events.isEmpty();
+			return (events == null || events.isEmpty()) &&
+				(relationships == null || relationships.isEmpty());
 		}
 		
 		@Override

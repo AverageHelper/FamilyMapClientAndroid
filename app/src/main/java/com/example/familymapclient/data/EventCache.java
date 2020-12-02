@@ -14,6 +14,7 @@ import java.util.Set;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import model.Event;
+import model.Person;
 
 public class EventCache extends IDMap<String, Event> {
 	private final @NonNull CountedSet<String> eventTypes;
@@ -127,6 +128,18 @@ public class EventCache extends IDMap<String, Event> {
 		unusedColors.remove(color);
 		
 		return color;
+	}
+	
+	public @NonNull Set<Event> lifeEventsForPerson(@NonNull Person person) {
+		Set<Event> result = new HashSet<>();
+		
+		for (Event event : values()) {
+			if (event.getPersonID().equals(person.getId())) {
+				result.add(event);
+			}
+		}
+		
+		return result;
 	}
 	
 	

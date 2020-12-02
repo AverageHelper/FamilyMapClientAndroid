@@ -7,8 +7,10 @@ import com.example.familymapclient.transport.ServerLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,6 +70,34 @@ public class PersonCache extends IDMap<String, Person> {
 	public @Nullable Person removeValueWithID(@NonNull String id) {
 		personEvents.remove(id);
 		return super.removeValueWithID(id);
+	}
+	
+	
+	public @NonNull Set<Relationship> relationshipsForPerson(@NonNull Person subject) {
+		Set<Relationship> relationships = new HashSet<>();
+		
+		if (subject.getFatherID() != null) {
+			Person father = getValueWithID(subject.getFatherID());
+			relationships.add(new Relationship(subject, father, RelationshipType.FATHER));
+		}
+		if (subject.getMotherID() != null) {
+			Person mother = getValueWithID(subject.getMotherID());
+			relationships.add(new Relationship(subject, mother, RelationshipType.MOTHER));
+		}
+		if (subject.getSpouseID() != null) {
+			Person spouse = getValueWithID(subject.getSpouseID());
+			relationships.add(new Relationship(subject, spouse, RelationshipType.SPOUSE));
+		}
+		for (Person child : values()) {
+			if (
+				(child.getFatherID() != null && child.getFatherID().equals(subject.getId())) ||
+				(child.getMotherID() != null && child.getMotherID().equals(subject.getId()))
+			) {
+				relationships.add(new Relationship(subject, child, RelationshipType.CHILD));
+			}
+		}
+		
+		return relationships;
 	}
 	
 	
