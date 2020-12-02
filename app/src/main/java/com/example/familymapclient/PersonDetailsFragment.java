@@ -16,6 +16,7 @@ import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.Relationship;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -209,7 +210,10 @@ public class PersonDetailsFragment extends Fragment {
 			if (events == null) {
 				return null;
 			}
-			return new ArrayList<>(events);
+			List<Event> result = new ArrayList<>(events);
+			Collections.sort(result, (event1, event2) ->
+				Integer.compare(event1.getYear(), event2.getYear()));
+			return result;
 		}
 		
 		private @Nullable List<Relationship> getSortedRelationships() {
