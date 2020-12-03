@@ -1,5 +1,6 @@
 package com.example.familymapclient;
 
+import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,8 +13,10 @@ import android.widget.TextView;
 
 import com.example.familymapclient.data.Color;
 import com.example.familymapclient.data.EventCache;
+import com.example.familymapclient.data.FilterType;
 import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.Relationship;
+import com.example.familymapclient.data.UISettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -105,11 +109,40 @@ public class PersonDetailsFragment extends Fragment {
 		}
 	}
 	
+	private @NonNull UISettings getUIPreferences() {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		UISettings settings = new UISettings();
+		settings.setFiltersEnabled(getActivity(), preferences);
+		settings.setLineTypesEnabled(getActivity(), preferences);
+		return settings;
+	}
+	
 	
 	
 	private void fetchLifeEvents() {
 		if (selectedPerson != null) {
-			Set<Event> events = eventCache.lifeEventsForPerson(selectedPerson);
+			Set<Event> events = new HashSet<>();
+			List<Event> allEvents = eventCache.lifeEventsForPerson(selectedPerson);
+			UISettings settings = getUIPreferences();
+			
+			for (Event event : allEvents) {
+				Person person = personCache.getValueWithID(event.getPersonID());
+				if (person != null) {
+					// Check filters
+					if (person.getGender().equals(Gender.MALE) &&
+						!settings.isFilterEnabled(FilterType.GENDER_MALE)) {
+						continue;
+					}
+					
+					if (person.getGender().equals(Gender.FEMALE) &&
+						!settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
+						continue;
+					}
+				}
+				
+				events.add(event);
+			}
+			
 			relatedRecordsAdapter.setEvents(events);
 		}
 	}
