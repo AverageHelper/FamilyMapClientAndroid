@@ -13,6 +13,7 @@ import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.data.Color;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.FilterType;
+import com.example.familymapclient.data.LineType;
 import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.UISettings;
 import com.example.familymapclient.data.fetch.PersonRequester;
@@ -383,9 +384,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		if (personForEvent == null || selectedEvent == null) {
 			return;
 		}
-		drawSpouseLine(selectedEvent, personForEvent, map);
-		drawFamilyTreeLines(selectedEvent, personForEvent, map);
-		drawLifeStoryLine(personForEvent, map);
+		UISettings settings = getUIPreferences();
+		
+		if (settings.isLineTypeEnabled(LineType.SPOUSE)) {
+			drawSpouseLine(selectedEvent, personForEvent, map);
+		}
+		if (settings.isLineTypeEnabled(LineType.FAMILY_TREE)) {
+			drawFamilyTreeLines(selectedEvent, personForEvent, map);
+		}
+		if (settings.isLineTypeEnabled(LineType.LIFE_STORY)) {
+			drawLifeStoryLine(personForEvent, map);
+		}
 	}
 	
 	private void drawSpouseLine(@NonNull Event event, @NonNull Person subject, @NonNull GoogleMap map) {
