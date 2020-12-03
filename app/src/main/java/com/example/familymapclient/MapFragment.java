@@ -27,9 +27,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -114,7 +119,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 			navigateToLoginFragment();
 		}
 		
-		updateMapContents();
 		setEvent(null);
 	}
 	
@@ -276,6 +280,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		if (person == null) {
 			fetchPerson(personID);
 		}
+		
+		updateMapContents();
 	}
 	
 	private void setPerson(@Nullable Person person) {
@@ -352,28 +358,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		map.clear();
 		
-		UISettings settings = getUIPreferences();
+		Set<Event> events = getDrawableEvents();
 		
-		// Add markers and lines
-		for (Event event : eventCache.values()) {
-			if (event.getLatitude() == null || event.getLongitude() == null) {
-				continue;
-			}
-			
-			Person person = personCache.getValueWithID(event.getPersonID());
-			if (person != null) {
-				// Check filters
-				if (person.getGender().equals(Gender.MALE) &&
-						!settings.isFilterEnabled(FilterType.GENDER_MALE)) {
-					continue;
-				}
-				
-				if (person.getGender().equals(Gender.FEMALE) &&
-						!settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
-					continue;
-				}
-			}
-			
+		addEventMarkersToMap(events, map);
+		addLinesToMap(map);
+	}
+	
+	private void addEventMarkersToMap(@NonNull Set<Event> events, @NonNull GoogleMap map) {
+		for (Event event : events) {
 			LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
 			Color color = eventCache.colorForEvent(event);
 			
@@ -384,6 +376,86 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 			Marker marker = map.addMarker(options);
 			marker.setTag(event);
 		}
+	}
+	
+	private void addLinesToMap(@NonNull GoogleMap map) {
+		if (personForEvent == null || selectedEvent == null) {
+			return;
+		}
+		drawSpouseLine(personForEvent, map);
+		drawFamilyTreeLines(map);
+		drawLifeStoryLine(personForEvent, map);
+	}
+	
+	private void drawSpouseLine(@NonNull Person subject, @NonNull GoogleMap map) {
+		Color color = eventCache.colorForEvent(selectedEvent);
+		String spouseId = subject.getSpouseID();
+		if (spouseId == null) {
+			return;
+		}
+		
+		List<Event> spouseEvents = eventCache.lifeEventsForPerson(spouseId);
+		if (spouseEvents.isEmpty()) {
+			return;
+		}
+		Event birthEvent = spouseEvents.get(0);
+		
+		map.addPolyline(new PolylineOptions()
+			.add(new LatLng(birthEvent.getLatitude(), birthEvent.getLongitude()))
+			.width(10)
+			.color(color.colorValue())
+		);
+	}
+	
+	private void drawFamilyTreeLines(@NonNull GoogleMap map) {
+	
+	}
+	
+	private void drawLifeStoryLine(@NonNull Person subject, @NonNull GoogleMap map) {
+		Color lifeStoryColor = Color.RED;
+		List<Event> lifeEvents = eventCache.lifeEventsForPerson(subject);
+		
+		List<LatLng> locations = new ArrayList<>();
+		for (Event event : lifeEvents) {
+			locations.add(new LatLng(event.getLatitude(), event.getLongitude()));
+		}
+		
+		if (!locations.isEmpty()) {
+			map.addPolyline(new PolylineOptions()
+				.addAll(locations)
+				.width(10)
+				.color(lifeStoryColor.colorValue())
+			);
+		}
+	}
+	
+	private @NonNull Set<Event> getDrawableEvents() {
+		Set<Event> result = new HashSet<>();
+		UISettings settings = getUIPreferences();
+		
+		for (Event event : eventCache.values()) {
+			if (event.getLatitude() == null || event.getLongitude() == null) {
+				continue;
+			}
+			
+			Person person = personCache.getValueWithID(event.getPersonID());
+			if (person != null) {
+				// Check filters
+				if (person.getGender().equals(Gender.MALE) &&
+					!settings.isFilterEnabled(FilterType.GENDER_MALE)) {
+					continue;
+				}
+				
+				if (person.getGender().equals(Gender.FEMALE) &&
+					!settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
+					continue;
+				}
+			}
+			
+			result.add(event);
+		}
+		
+		return result;
 	}
 	
 	@Override

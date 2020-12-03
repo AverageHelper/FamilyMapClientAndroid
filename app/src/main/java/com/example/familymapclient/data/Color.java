@@ -52,6 +52,30 @@ public enum Color {
 	}
 	
 	/**
+	 * @return The {@link android.graphics.Color} for the value.
+	 */
+	public @NonNull int colorValue() {
+		switch (this) {
+			case RED: return android.graphics.Color.RED;
+			case ORANGE: //return android.graphics.Color;
+				return android.graphics.Color.GRAY;
+			case YELLOW: return android.graphics.Color.YELLOW;
+			case GREEN: return android.graphics.Color.GREEN;
+			case CYAN: return android.graphics.Color.CYAN;
+			case AZURE: //return android.graphics.Color.BLUE;
+				return android.graphics.Color.WHITE;
+			case BLUE: return android.graphics.Color.BLUE;
+			case VIOLET: //return android.graphics.Color.MAGENTA;
+				return android.graphics.Color.BLACK;
+			case MAGENTA: return android.graphics.Color.MAGENTA;
+			case ROSE: //return android.graphics.Color.WHITE;
+				return android.graphics.Color.BLACK;
+			
+			default: return android.graphics.Color.BLACK;
+		}
+	}
+	
+	/**
 	 * @return a random {@link Color} value.
 	 */
 	public static @NonNull Color random() {

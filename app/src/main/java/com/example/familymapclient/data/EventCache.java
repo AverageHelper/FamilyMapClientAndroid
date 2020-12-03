@@ -5,6 +5,8 @@ import com.example.familymapclient.data.fetch.EventsRequester;
 import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.utilities.ArrayHelpers;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -130,14 +132,32 @@ public class EventCache extends IDMap<String, Event> {
 		return color;
 	}
 	
-	public @NonNull Set<Event> lifeEventsForPerson(@NonNull Person person) {
-		Set<Event> result = new HashSet<>();
+	/**
+	 * Gets the events associated with the given <code>person</code>, ordered chronologically.
+	 * @param person The {@link Person} whose events to fetch.
+	 * @return A list of events associated with the person, ordered chronologically.
+	 */
+	public @NonNull List<Event> lifeEventsForPerson(@NonNull Person person) {
+		return lifeEventsForPerson(person.getId());
+	}
+	
+	/**
+	 * Gets the events associated with the person with the given <code>personId</code>, ordered
+	 * chronologically.
+	 * @param personId The ID of the Person whose events to fetch.
+	 * @return A list of events associated with the person, ordered chronologically.
+	 */
+	public @NonNull List<Event> lifeEventsForPerson(@NonNull String personId) {
+		List<Event> result = new ArrayList<>();
 		
 		for (Event event : values()) {
-			if (event.getPersonID().equals(person.getId())) {
+			if (event.getPersonID().equals(personId)) {
 				result.add(event);
 			}
 		}
+		
+		Collections.sort(result, (event1, event2) ->
+			Integer.compare(event1.getYear(), event2.getYear()));
 		
 		return result;
 	}

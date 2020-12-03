@@ -5,7 +5,6 @@ import com.example.familymapclient.data.fetch.PersonRequester;
 import com.example.familymapclient.data.fetch.PersonsRequester;
 import com.example.familymapclient.transport.ServerLocation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,7 @@ import model.Event;
 import model.Person;
 
 public class PersonCache extends IDMap<String, Person> {
-	private final Map<String, List<Event>> personEvents;
+	private final Map<String, Set<Event>> personEvents;
 	
 	private static @Nullable PersonCache instance = null;
 	public static @NonNull PersonCache shared() {
@@ -40,11 +39,11 @@ public class PersonCache extends IDMap<String, Person> {
 	 * @param person The person whose events need to be listed.
 	 * @return A list of <code>Event</code> entries, or <code>null</code> if the given person is not known.
 	 */
-	public @Nullable List<Event> eventsForPerson(@NonNull Person person) {
+	public @Nullable Set<Event> eventsForPerson(@NonNull Person person) {
 		return eventsForPerson(person.getId());
 	}
 	
-	public @Nullable List<Event> eventsForPerson(@NonNull String personID) {
+	public @Nullable Set<Event> eventsForPerson(@NonNull String personID) {
 		return personEvents.get(personID);
 	}
 	
@@ -54,7 +53,7 @@ public class PersonCache extends IDMap<String, Person> {
 		
 		// Prepare the events map if it isn't prepared already
 		if (eventsForPerson(person) == null) {
-			personEvents.put(person.getId(), new ArrayList<>());
+			personEvents.put(person.getId(), new HashSet<>());
 		}
 	}
 	
