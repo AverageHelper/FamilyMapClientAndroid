@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
@@ -348,13 +349,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	private @NonNull UISettings getUIPreferences() {
 		MainActivity activity = (MainActivity) getActivity();
-		return activity.getUISettings();
+		return Objects.requireNonNull(activity).getUISettings();
 	}
 	
 	private void updateMapContents() {
-		if (this.map == null) {
-			return;
-		}
+		if (this.map == null) { return; }
 		
 		map.clear();
 		
@@ -366,15 +365,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	private void addEventMarkersToMap(@NonNull Set<Event> events, @NonNull GoogleMap map) {
 		for (Event event : events) {
-			LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
-			Color color = eventCache.colorForEvent(event);
-			
-			MarkerOptions options = new MarkerOptions()
-				.position(location)
-				.icon(BitmapDescriptorFactory.defaultMarker(color.value()));
-			
-			Marker marker = map.addMarker(options);
-			marker.setTag(event);
+			if (event.getLatitude() != null && event.getLongitude() != null) {
+				LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
+				Color color = eventCache.colorForEvent(event);
+				
+				MarkerOptions options = new MarkerOptions()
+					.position(location)
+					.icon(BitmapDescriptorFactory.defaultMarker(color.value()));
+				
+				Marker marker = map.addMarker(options);
+				marker.setTag(event);
+			}
 		}
 	}
 	
@@ -382,33 +383,76 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		if (personForEvent == null || selectedEvent == null) {
 			return;
 		}
-		drawSpouseLine(personForEvent, map);
-		drawFamilyTreeLines(map);
+		drawSpouseLine(selectedEvent, personForEvent, map);
+		drawFamilyTreeLines(selectedEvent, personForEvent, map);
 		drawLifeStoryLine(personForEvent, map);
 	}
 	
-	private void drawSpouseLine(@NonNull Person subject, @NonNull GoogleMap map) {
-		Color color = eventCache.colorForEvent(selectedEvent);
+	private void drawSpouseLine(@NonNull Event event, @NonNull Person subject, @NonNull GoogleMap map) {
+		Color color = eventCache.colorForEvent(event);
 		String spouseId = subject.getSpouseID();
-		if (spouseId == null) {
-			return;
-		}
+		if (spouseId == null) { return; }
 		
 		List<Event> spouseEvents = eventCache.lifeEventsForPerson(spouseId);
-		if (spouseEvents.isEmpty()) {
-			return;
-		}
+		if (spouseEvents.isEmpty()) { return; }
 		Event birthEvent = spouseEvents.get(0);
 		
-		map.addPolyline(new PolylineOptions()
-			.add(new LatLng(birthEvent.getLatitude(), birthEvent.getLongitude()))
-			.width(10)
-			.color(color.colorValue())
-		);
+		if (birthEvent.getLatitude() != null && birthEvent.getLongitude() != null) {
+			map.addPolyline(new PolylineOptions()
+				.add(new LatLng(birthEvent.getLatitude(), birthEvent.getLongitude()))
+				.width(10)
+				.color(color.colorValue())
+			);
+		}
 	}
 	
-	private void drawFamilyTreeLines(@NonNull GoogleMap map) {
+	private void drawFamilyTreeLines(@NonNull Event event, @NonNull Person subject, @NonNull GoogleMap map) {
+		drawFamilyTreeLines(event, subject, map, 20, new HashSet<>());
+	}
 	
+	private void drawFamilyTreeLines(@NonNull Event event, @NonNull Person subject, @NonNull GoogleMap map, int lineWidth, @NonNull Set<Event> drawnEvents) {
+		Color color = Color.BLUE; //eventCache.colorForEvent(event);
+		
+		Set<String> parentsIDs = new HashSet<>();
+		String fatherId = subject.getFatherID();
+		String motherId = subject.getMotherID();
+		if (fatherId != null) {
+			parentsIDs.add(fatherId);
+		}
+		if (motherId != null) {
+			parentsIDs.add(motherId);
+		}
+		
+		// Draw line to parents' birth events
+		for (String personId : parentsIDs) {
+			List<Event> fatherEvents = eventCache.lifeEventsForPerson(personId);
+			if (fatherEvents.isEmpty()) { continue; }
+			
+			List<LatLng> locations = new ArrayList<>();
+			if (event.getLatitude() != null && event.getLongitude() != null) {
+				locations.add(new LatLng(event.getLatitude(), event.getLongitude()));
+			}
+			
+			Event parentBirthEvent = fatherEvents.get(0);
+			Person parent = personCache.getValueWithID(personId);
+			if (parent != null) {
+				int newLineWidth = (int) Math.floor(lineWidth * 0.5);
+				if (drawnEvents.add(parentBirthEvent)) { // prevent infinite recursion
+					drawFamilyTreeLines(parentBirthEvent, parent, map, newLineWidth, drawnEvents);
+				}
+			}
+			if (parentBirthEvent.getLatitude() != null && parentBirthEvent.getLongitude() != null) {
+				locations.add(new LatLng(parentBirthEvent.getLatitude(), parentBirthEvent.getLongitude()));
+			}
+			
+			if (!locations.isEmpty()) {
+				map.addPolyline(new PolylineOptions()
+					.addAll(locations)
+					.width(lineWidth)
+					.color(color.colorValue())
+				);
+			}
+		}
 	}
 	
 	private void drawLifeStoryLine(@NonNull Person subject, @NonNull GoogleMap map) {
@@ -417,7 +461,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		List<LatLng> locations = new ArrayList<>();
 		for (Event event : lifeEvents) {
-			locations.add(new LatLng(event.getLatitude(), event.getLongitude()));
+			if (event.getLatitude() != null && event.getLongitude() != null) {
+				locations.add(new LatLng(event.getLatitude(), event.getLongitude()));
+			}
 		}
 		
 		if (!locations.isEmpty()) {

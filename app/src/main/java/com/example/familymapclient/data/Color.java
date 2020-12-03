@@ -54,7 +54,7 @@ public enum Color {
 	/**
 	 * @return The {@link android.graphics.Color} for the value.
 	 */
-	public @NonNull int colorValue() {
+	public int colorValue() {
 		switch (this) {
 			case RED: return android.graphics.Color.RED;
 			case ORANGE: //return android.graphics.Color;
