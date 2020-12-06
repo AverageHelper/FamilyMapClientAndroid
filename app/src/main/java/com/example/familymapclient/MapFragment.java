@@ -161,51 +161,52 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	}
 	
 	private void initializeMaps() {
-		if (this.getActivity() != null) {
-			int result = MapsInitializer.initialize(this.getActivity());
-			if (result != ConnectionResult.SUCCESS) {
-				switch (result) {
-					case ConnectionResult.API_UNAVAILABLE:
-					case ConnectionResult.SERVICE_DISABLED:
-						presentSnackbar(getString(R.string.maps_error_api_unavailable));
-						break;
-					
-					case ConnectionResult.CANCELED:
-						presentSnackbar(getString(R.string.maps_error_canceled));
-						break;
-					
-					case ConnectionResult.DEVELOPER_ERROR:
-						presentSnackbar(getString(R.string.maps_error_developer_error));
-						break;
-						
-					case ConnectionResult.INTERNAL_ERROR:
-						presentSnackbar(getString(R.string.maps_error_internal_error));
-						break;
-					
-					case ConnectionResult.LICENSE_CHECK_FAILED:
-						presentSnackbar(getString(R.string.maps_error_license_check_failed));
-						break;
-					
-					case ConnectionResult.NETWORK_ERROR:
-						presentSnackbar(getString(R.string.maps_error_network_error));
-						break;
-					
-					case ConnectionResult.SERVICE_INVALID:
-						presentSnackbar(getString(R.string.maps_error_service_invalid));
-						break;
-					
-					case ConnectionResult.SERVICE_MISSING:
-						presentSnackbar(getString(R.string.maps_error_service_not_found));
-						break;
-						
-					case ConnectionResult.TIMEOUT:
-						presentSnackbar(getString(R.string.maps_error_timeout));
-						break;
-					
-					default:
-						presentSnackbar(getString(R.string.maps_error_unknown));
-				}
-			}
+		if (getActivity() == null) { return; }
+		
+		int result = MapsInitializer.initialize(getActivity());
+		if (result == ConnectionResult.SUCCESS) { return; }
+		
+		switch (result) {
+			case ConnectionResult.API_UNAVAILABLE:
+			case ConnectionResult.SERVICE_DISABLED:
+				presentSnackbar(getString(R.string.maps_error_api_unavailable));
+				break;
+			
+			case ConnectionResult.CANCELED:
+				presentSnackbar(getString(R.string.maps_error_canceled));
+				break;
+			
+			case ConnectionResult.DEVELOPER_ERROR:
+				presentSnackbar(getString(R.string.maps_error_developer_error));
+				break;
+				
+			case ConnectionResult.INTERNAL_ERROR:
+				presentSnackbar(getString(R.string.maps_error_internal_error));
+				break;
+			
+			case ConnectionResult.LICENSE_CHECK_FAILED:
+				presentSnackbar(getString(R.string.maps_error_license_check_failed));
+				break;
+			
+			case ConnectionResult.NETWORK_ERROR:
+				presentSnackbar(getString(R.string.maps_error_network_error));
+				break;
+			
+			case ConnectionResult.SERVICE_INVALID:
+				presentSnackbar(getString(R.string.maps_error_service_invalid));
+				break;
+			
+			case ConnectionResult.SERVICE_MISSING:
+				presentSnackbar(getString(R.string.maps_error_service_not_found));
+				break;
+				
+			case ConnectionResult.TIMEOUT:
+				presentSnackbar(getString(R.string.maps_error_timeout));
+				break;
+			
+			default:
+				presentSnackbar(getString(R.string.maps_error_unknown));
+				break;
 		}
 	}
 	
@@ -215,9 +216,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	private @Nullable PersonRequester personFetch = null;
 	
 	private void fetchPerson(@NonNull String personID) {
-		if (auth.getAuthToken() == null) {
-			return;
-		}
+		if (auth.getAuthToken() == null) { return; }
+		if (personCache.getValueWithID(personID) != null) { return; }
+		
 		ServerLocation server = new ServerLocation(
 			auth.getHostname(),
 			auth.getPortNumber(),
@@ -328,9 +329,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	// ** Map Lifecycle
 	
 	private boolean onMapMarkerTapped(@NonNull Marker marker) {
-		if (map == null) {
-			return false;
-		}
+		if (map == null) { return false; }
 		
 		map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
 		if (marker.getTag() != null) { // The event is stored in the tag
@@ -358,10 +357,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		map.clear();
 		
-		Set<Event> events = getDrawableEvents();
+		UISettings settings = getUIPreferences();
+		Set<Event> events = getDrawableEvents(settings);
 		
 		addEventMarkersToMap(events, map);
-		addLinesToMap(map);
+		addLinesToMap(settings, map);
 	}
 	
 	private void addEventMarkersToMap(@NonNull Set<Event> events, @NonNull GoogleMap map) {
@@ -380,11 +380,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
-	private void addLinesToMap(@NonNull GoogleMap map) {
+	private void addLinesToMap(@NonNull UISettings settings, @NonNull GoogleMap map) {
 		if (personForEvent == null || selectedEvent == null) {
 			return;
 		}
-		UISettings settings = getUIPreferences();
 		
 		if (settings.isLineTypeEnabled(LineType.SPOUSE)) {
 			drawSpouseLine(selectedEvent, personForEvent, map);
@@ -484,9 +483,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
-	private @NonNull Set<Event> getDrawableEvents() {
+	private @NonNull Set<Event> getDrawableEvents(@NonNull UISettings settings) {
 		Set<Event> result = new HashSet<>();
-		UISettings settings = getUIPreferences();
 		
 		for (Event event : eventCache.values()) {
 			if (event.getLatitude() == null || event.getLongitude() == null) {

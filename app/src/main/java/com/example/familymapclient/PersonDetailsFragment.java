@@ -1,7 +1,7 @@
 package com.example.familymapclient;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,6 +95,7 @@ public class PersonDetailsFragment extends Fragment {
 		lifeEventsList.setAdapter(relatedRecordsAdapter);
 		lifeEventsList.expandGroup(0);
 		lifeEventsList.expandGroup(1);
+		lifeEventsList.setOnChildClickListener(this::onChildClick);
 	}
 	
 	
@@ -162,26 +163,56 @@ public class PersonDetailsFragment extends Fragment {
 		}
 	}
 	
+	private boolean onChildClick(
+		ExpandableListView parent,
+		View view,
+		int groupPosition,
+		int childPosition,
+		long id
+	) {
+		RelatedRecordsAdapter adapter = (RelatedRecordsAdapter) parent.getExpandableListAdapter();
+		@Nullable Object child = adapter.getChild(groupPosition, childPosition);
+		
+		if (child == null) {
+			return false;
+		}
+		
+		if (child.getClass().equals(Event.class)) {
+			Event event = (Event) child;
+			onEventClick(event);
+			
+		} else if (child.getClass().equals(Relationship.class)) {
+			Relationship relationship = (Relationship) child;
+			onRelationshipClick(relationship);
+		}
+		
+		return true;
+	}
+	
+	private void onEventClick(@NonNull Event event) {
+		// Create a new Event activity
+	}
+	
+	private void onRelationshipClick(@NonNull Relationship relationship) {
+		startPersonActivity(relationship.getOther());
+	}
+	
+	private void startPersonActivity(@NonNull Person person) {
+		Intent personDetails = PersonActivity.newIntent(getActivity(), person);
+		startActivity(personDetails);
+	}
+	
 	private class PersonDetailAdapter extends RecyclerView.Adapter<PersonDetailAdapter.ViewHolder> {
 		
 		private final @NonNull List<Pair<String, String>> details;
 		
 		public PersonDetailAdapter(@Nullable Person person) {
-			// Add person details
 			details = new ArrayList<>();
-			if (person == null) {
-				details.add(new Pair<>(getString(R.string.person_first_name), "John"));
-				details.add(new Pair<>(getString(R.string.person_last_name), "Doe"));
-				details.add(new Pair<>(getString(R.string.person_gender), "no gender"));
-			} else {
+			if (person != null) {
 				details.add(new Pair<>(getString(R.string.person_first_name), person.getFirstName()));
 				details.add(new Pair<>(getString(R.string.person_last_name), person.getLastName()));
 				details.add(new Pair<>(getString(R.string.person_gender), stringForGender(person.getGender())));
 			}
-			
-			// Add life events
-			
-			// Add family members
 		}
 		
 		@Override
@@ -219,24 +250,17 @@ public class PersonDetailsFragment extends Fragment {
 	
 	private class RelatedRecordsAdapter extends BaseExpandableListAdapter {
 		
-		private final Set<DataSetObserver> observers = new HashSet<>();
 		private @Nullable Set<Event> events = null;
 		private @Nullable Set<Relationship> relationships = null;
 		
 		public void setEvents(@Nullable Set<Event> events) {
 			this.events = events;
-			sendUpdates();
+			notifyDataSetChanged();
 		}
 		
 		public void setRelationships(@Nullable Set<Relationship> relationships) {
 			this.relationships = relationships;
-			sendUpdates();
-		}
-		
-		private void sendUpdates() {
-			for (DataSetObserver observer : observers) {
-				observer.onChanged();
-			}
+			notifyDataSetChanged();
 		}
 		
 		private @Nullable List<Event> getSortedEvents() {
@@ -254,16 +278,6 @@ public class PersonDetailsFragment extends Fragment {
 				return null;
 			}
 			return new ArrayList<>(relationships);
-		}
-		
-		@Override
-		public void registerDataSetObserver(DataSetObserver observer) {
-			observers.add(observer);
-		}
-		
-		@Override
-		public void unregisterDataSetObserver(DataSetObserver observer) {
-			observers.remove(observer);
 		}
 		
 		@Override
@@ -461,38 +475,7 @@ public class PersonDetailsFragment extends Fragment {
 		
 		@Override
 		public boolean isChildSelectable(int groupPosition, int childPosition) {
-			return false;
-		}
-		
-		@Override
-		public boolean areAllItemsEnabled() {
-			return events != null && relationships != null;
-		}
-		
-		@Override
-		public boolean isEmpty() {
-			return (events == null || events.isEmpty()) &&
-				(relationships == null || relationships.isEmpty());
-		}
-		
-		@Override
-		public void onGroupExpanded(int groupPosition) {
-		
-		}
-		
-		@Override
-		public void onGroupCollapsed(int groupPosition) {
-		
-		}
-		
-		@Override
-		public long getCombinedChildId(long groupId, long childId) {
-			return groupId & childId;
-		}
-		
-		@Override
-		public long getCombinedGroupId(long groupId) {
-			return groupId;
+			return true;
 		}
 	}
 	

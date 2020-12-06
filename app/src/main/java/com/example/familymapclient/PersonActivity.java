@@ -23,6 +23,7 @@ import model.Person;
 public class PersonActivity extends AppCompatActivity {
 	
 	public static final String ARG_PERSON_JSON = "person_json";
+	public static boolean shouldPopToRoot = false;
 	
 	private final PersonCache personCache = PersonCache.shared();
 	private final EventCache eventCache = EventCache.shared();
@@ -50,12 +51,24 @@ public class PersonActivity extends AppCompatActivity {
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+		
+		shouldPopToRoot = false;
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (shouldPopToRoot) {
+			finish();
+		}
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == android.R.id.home) {
+			shouldPopToRoot = true;
 			finish();
 			return true;
 		}
