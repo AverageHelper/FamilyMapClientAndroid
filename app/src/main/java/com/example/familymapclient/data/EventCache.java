@@ -101,11 +101,11 @@ public class EventCache extends IDMap<String, Event> {
 		Color color = ArrayHelpers.randomElementFromList(allColors);
 		
 		while (!unusedColors.contains(color)) {
+			allColors.remove(color);
 			if (allColors.isEmpty()) {
 				color = Color.random();
 				break;
 			}
-			allColors.remove(color);
 			color = ArrayHelpers.randomElementFromList(allColors);
 		}
 		
