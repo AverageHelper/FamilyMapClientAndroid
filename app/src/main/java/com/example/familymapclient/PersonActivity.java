@@ -19,7 +19,6 @@ import model.Person;
 public class PersonActivity extends AppCompatActivity {
 	
 	public static final String ARG_PERSON_JSON = "person_json";
-	public static boolean shouldPopToRoot = false;
 	
 	/**
 	 * Creates a new {@link Intent} to start the activity.
@@ -46,14 +45,14 @@ public class PersonActivity extends AppCompatActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 		
-		shouldPopToRoot = false;
+		MainActivity.shouldPopToRoot = false;
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		
-		if (shouldPopToRoot) {
+		if (MainActivity.shouldPopToRoot) {
 			finish();
 		}
 	}
@@ -62,7 +61,7 @@ public class PersonActivity extends AppCompatActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == android.R.id.home) {
-			shouldPopToRoot = true;
+			MainActivity.shouldPopToRoot = true;
 			finish();
 			return true;
 		}

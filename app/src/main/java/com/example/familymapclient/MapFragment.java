@@ -47,6 +47,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import model.Event;
 import model.Gender;
 import model.Person;
+import transport.JSONSerialization;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
@@ -70,17 +71,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	
 	// ** Lifecycle Events
-	
-//	public static final String ARG_EVENTS = "events";
-//
-//	public static @NonNull MapFragment newInstance(@NonNull ArrayList<String> eventIDs) {
-//		Bundle args = new Bundle();
-//		args.putStringArrayList(ARG_EVENTS, eventIDs);
-//
-//		MapFragment fragment = new MapFragment();
-//		fragment.setArguments(args);
-//		return fragment;
-//	}
 	
 	@Override
 	public View onCreateView(
@@ -136,6 +126,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	private void setupCacheListeners() {
 		eventCacheHandler = eventCache.addUpdateHandler(cache -> this.updateMapContents());
+	}
+	
+	private void getActivityArguments() {
+		if (getActivity() != null) {
+			String eventJSON = getActivity().getIntent().getStringExtra(EventActivity.ARG_EVENT_JSON);
+			if (eventJSON == null) { return; }
+			try {
+				setEvent(JSONSerialization.fromJson(eventJSON, Event.class));
+			} catch (Exception e) {
+				System.out.println("Failed to deserialize JSON: " + e);
+			}
+		}
 	}
 	
 	private void findMapView(@NonNull View view, Bundle savedInstanceState) {
@@ -271,6 +273,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 			imageContainer.setVisibility(View.GONE);
 			loadingIndicator.setVisibility(View.GONE);
 			return;
+		} else {
+			centerMapOnEvent(event);
 		}
 		
 		imageContainer.setVisibility(View.VISIBLE);
@@ -285,6 +289,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 		
 		updateMapContents();
+	}
+	
+	private void centerMapOnEvent(@NonNull Event event) {
+		if (map == null) { return; }
+		
+		if (event.getLatitude() != null && event.getLongitude() != null) {
+			map.animateCamera(
+				CameraUpdateFactory.newLatLng(new LatLng(event.getLatitude(), event.getLongitude()))
+			);
+		}
 	}
 	
 	private void setPerson(@Nullable Person person) {
@@ -329,14 +343,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	// ** Map Lifecycle
 	
 	private boolean onMapMarkerTapped(@NonNull Marker marker) {
-		if (map == null) { return false; }
-		
-		map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
 		if (marker.getTag() != null) { // The event is stored in the tag
 			setEvent((Event) marker.getTag());
 			return true;
 		}
-		
 		return false;
 	}
 	
@@ -345,6 +355,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		this.map = googleMap;
 		this.map.setOnMarkerClickListener(this::onMapMarkerTapped);
 		updateMapContents();
+		getActivityArguments();
 	}
 	
 	private @Nullable UISettings getUIPreferences() {

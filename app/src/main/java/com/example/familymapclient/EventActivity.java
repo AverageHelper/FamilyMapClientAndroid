@@ -43,12 +43,24 @@ public class EventActivity extends UIPreferencesActivity {
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+		
+		MainActivity.shouldPopToRoot = false;
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (MainActivity.shouldPopToRoot) {
+			finish();
+		}
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == android.R.id.home) {
+			MainActivity.shouldPopToRoot = true;
 			finish();
 			return true;
 		}

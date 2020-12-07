@@ -22,6 +22,8 @@ import android.view.MenuItem;
 
 public class MainActivity extends UIPreferencesActivity {
 	
+	public static boolean shouldPopToRoot = false;
+	
 	public static final String KEY_SERVER_HOST_NAME = "KEY_SERVER_HOST_NAME";
 	public static final String KEY_SERVER_PORT = "KEY_SERVER_PORT";
 	public static final String KEY_SERVER_USES_HTTPS = "KEY_SERVER_USES_HTTPS";
