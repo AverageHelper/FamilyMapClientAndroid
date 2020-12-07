@@ -50,4 +50,9 @@ public class ServerLocation {
 	public @NonNull URL getURL(@NonNull String path) throws MalformedURLException {
 		return location.getURL(path);
 	}
+	
+	@Override
+	public String toString() {
+		return location.toString();
+	}
 }

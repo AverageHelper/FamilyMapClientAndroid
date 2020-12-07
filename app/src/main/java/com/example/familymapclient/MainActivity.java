@@ -20,7 +20,7 @@ import androidx.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends UIPreferencesActivity {
 	
 	public static final String KEY_SERVER_HOST_NAME = "KEY_SERVER_HOST_NAME";
 	public static final String KEY_SERVER_PORT = "KEY_SERVER_PORT";
@@ -33,18 +33,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	private final Auth auth = Auth.shared();
 	private @Nullable Integer authStateHandler = null;
 	public static boolean didWelcomeUser = false;
-	private @Nullable UISettings uiSettings = null;
 	private PersistentStore keyValueStore;
 	
 	private MenuItem searchItem;
 	private MenuItem settingsItem;
-	
-	public @NonNull UISettings getUISettings() {
-		if (uiSettings == null) {
-			return new UISettings();
-		}
-		return uiSettings;
-	}
 	
 	
 	// ** Lifecycle Events
@@ -53,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setupSharedPreferences();
 		keyValueStore = new KeyValueStore(this);
 		restoreModelState(keyValueStore);
 		auth.setPersistentStore(keyValueStore);
@@ -103,6 +94,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 		return super.onOptionsItemSelected(item);
 	}
 	
+	@Override
+	public void onBackPressed() {
+		moveTaskToBack(true);
+	}
+	
 	
 	private boolean shouldLogOut = false;
 	
@@ -136,24 +132,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 	
 	
 	// ** Persistence
-	
-	private void setupSharedPreferences() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-		uiSettings = new UISettings();
-		readPreferenceValuesIntoUISettings(sharedPreferences);
-	}
-	
-	@Override
-	public void onSharedPreferenceChanged(@NonNull SharedPreferences sharedPreferences, String key) {
-		readPreferenceValuesIntoUISettings(sharedPreferences);
-		// TODO: Inform fragments (?)
-	}
-	
-	private void readPreferenceValuesIntoUISettings(@NonNull SharedPreferences sharedPreferences) {
-		uiSettings.setLineTypesEnabled(this, sharedPreferences);
-		uiSettings.setFiltersEnabled(this, sharedPreferences);
-	}
 	
 	private void saveModelState(@NonNull PersistentStore outState) {
 		// Save server location

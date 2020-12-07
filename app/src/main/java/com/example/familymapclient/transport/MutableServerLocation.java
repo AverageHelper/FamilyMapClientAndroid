@@ -84,4 +84,12 @@ public class MutableServerLocation extends JSONSerialization {
 	
 	@Override
 	public void assertCorrectDeserialization() throws MissingKeyException {}
+	
+	@Override
+	public String toString() {
+		String protocol = usesSecureProtocol
+			? "https"
+			: "http";
+		return protocol + "://" + hostname + ":" + portNumber;
+	}
 }

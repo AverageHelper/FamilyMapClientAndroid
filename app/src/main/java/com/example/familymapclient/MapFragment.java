@@ -347,9 +347,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		updateMapContents();
 	}
 	
-	private @NonNull UISettings getUIPreferences() {
-		MainActivity activity = (MainActivity) getActivity();
-		return Objects.requireNonNull(activity).getUISettings();
+	private @Nullable UISettings getUIPreferences() {
+		if (getActivity() != null && UIPreferencesActivity.class.isAssignableFrom(getActivity().getClass())) {
+			UIPreferencesActivity activity = (UIPreferencesActivity) getActivity();
+			return Objects.requireNonNull(activity).getUISettings();
+		}
+		return null;
 	}
 	
 	private void updateMapContents() {
@@ -380,18 +383,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
-	private void addLinesToMap(@NonNull UISettings settings, @NonNull GoogleMap map) {
+	private void addLinesToMap(@Nullable UISettings settings, @NonNull GoogleMap map) {
 		if (personForEvent == null || selectedEvent == null) {
 			return;
 		}
 		
-		if (settings.isLineTypeEnabled(LineType.SPOUSE)) {
+		if (settings == null || settings.isLineTypeEnabled(LineType.SPOUSE)) {
 			drawSpouseLine(selectedEvent, personForEvent, map);
 		}
-		if (settings.isLineTypeEnabled(LineType.FAMILY_TREE)) {
+		if (settings == null || settings.isLineTypeEnabled(LineType.FAMILY_TREE)) {
 			drawFamilyTreeLines(selectedEvent, personForEvent, map);
 		}
-		if (settings.isLineTypeEnabled(LineType.LIFE_STORY)) {
+		if (settings == null || settings.isLineTypeEnabled(LineType.LIFE_STORY)) {
 			drawLifeStoryLine(personForEvent, map);
 		}
 	}
@@ -483,7 +486,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
-	private @NonNull Set<Event> getDrawableEvents(@NonNull UISettings settings) {
+	private @NonNull Set<Event> getDrawableEvents(@Nullable UISettings settings) {
 		Set<Event> result = new HashSet<>();
 		
 		for (Event event : eventCache.values()) {
@@ -492,7 +495,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 			}
 			
 			Person person = personCache.getValueWithID(event.getPersonID());
-			if (person != null) {
+			if (settings != null && person != null) {
 				// Check filters
 				if (person.getGender().equals(Gender.MALE) &&
 					!settings.isFilterEnabled(FilterType.GENDER_MALE)) {

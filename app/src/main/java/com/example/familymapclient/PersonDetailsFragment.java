@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
@@ -110,12 +111,12 @@ public class PersonDetailsFragment extends Fragment {
 		}
 	}
 	
-	private @NonNull UISettings getUIPreferences() {
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		UISettings settings = new UISettings();
-		settings.setFiltersEnabled(getActivity(), preferences);
-		settings.setLineTypesEnabled(getActivity(), preferences);
-		return settings;
+	private @Nullable UISettings getUIPreferences() {
+		if (getActivity() != null && UIPreferencesActivity.class.isAssignableFrom(getActivity().getClass())) {
+			UIPreferencesActivity activity = (UIPreferencesActivity) getActivity();
+			return Objects.requireNonNull(activity).getUISettings();
+		}
+		return null;
 	}
 	
 	
@@ -131,11 +132,13 @@ public class PersonDetailsFragment extends Fragment {
 				if (person != null) {
 					// Check filters
 					if (person.getGender().equals(Gender.MALE) &&
+						settings != null &&
 						!settings.isFilterEnabled(FilterType.GENDER_MALE)) {
 						continue;
 					}
 					
 					if (person.getGender().equals(Gender.FEMALE) &&
+						settings != null &&
 						!settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
 						continue;
 					}
@@ -190,7 +193,7 @@ public class PersonDetailsFragment extends Fragment {
 	}
 	
 	private void onEventClick(@NonNull Event event) {
-		// Create a new Event activity
+		startEventActivity(event);
 	}
 	
 	private void onRelationshipClick(@NonNull Relationship relationship) {
@@ -199,6 +202,11 @@ public class PersonDetailsFragment extends Fragment {
 	
 	private void startPersonActivity(@NonNull Person person) {
 		Intent personDetails = PersonActivity.newIntent(getActivity(), person);
+		startActivity(personDetails);
+	}
+	
+	private void startEventActivity(@NonNull Event event) {
+		Intent personDetails = EventActivity.newIntent(getActivity(), event);
 		startActivity(personDetails);
 	}
 	
@@ -388,7 +396,7 @@ public class PersonDetailsFragment extends Fragment {
 		@Override
 		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 			View cell;
-			if (/*convertView != null &&*/ false) {
+			if (convertView != null) {
 				cell = convertView;
 			} else {
 				LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
@@ -417,6 +425,7 @@ public class PersonDetailsFragment extends Fragment {
 					event.getYear()
 				));
 				Color color = eventCache.colorForEvent(event);
+				imageView.setImageBitmap(null);
 				// FIXME: How do we properly pass this in?
 				imageView.setColorFilter((int) color.value());
 				

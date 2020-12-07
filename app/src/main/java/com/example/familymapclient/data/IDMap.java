@@ -50,10 +50,18 @@ public class IDMap<ID, Element extends Identifiable<ID>> {
 	}
 	
 	/**
-	 * Removes every element from the cache.
+	 * Removes all of the mappings from this map. The map will be empty after this call returns.
 	 */
 	public void clear() {
 		values.clear();
+	}
+	
+	/**
+	 * Returns <code>true</code> if this map contains no key-value mappings.
+	 * @return <code>true</code> if this map contains no key-value mappings
+	 */
+	public boolean isEmpty() {
+		return values.isEmpty();
 	}
 	
 	/**

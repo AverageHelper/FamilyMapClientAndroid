@@ -95,9 +95,14 @@ public class LoadingFragment extends Fragment {
 	private @Nullable EventsRequester eventsFetch = null;
 	
 	private void fetchPersonAndEvents() {
-		if (auth.getPersonID() == null || auth.getAuthToken() == null) {
+		if (auth.getPersonID() == null || auth.getAuthToken() == null ||
+				(!personCache.isEmpty() && !eventCache.isEmpty())) {
+			// No need to load data
+			navigateToMapFragment();
 			return;
 		}
+		
+		// Load data
 		ServerLocation server = new ServerLocation(
 			auth.getHostname(),
 			auth.getPortNumber(),
@@ -106,13 +111,17 @@ public class LoadingFragment extends Fragment {
 		personsFetch = personCache.fetchAllPersons(
 			server,
 			auth.getAuthToken(),
-			person -> {
+			persons -> {
 				if (personsFetch != null) {
 					if (!MainActivity.didWelcomeUser) {
 						Person currentUser = personCache.getValueWithID(auth.getPersonID());
-						presentToast("Welcome, " +
-							currentUser.getFirstName() + " " +
-							currentUser.getLastName() + "!");
+						if (currentUser != null) {
+							presentToast("Welcome, " +
+								currentUser.getFirstName() + " " +
+								currentUser.getLastName() + "!");
+						} else {
+							presentToast("Welcome, User!");
+						}
 						MainActivity.didWelcomeUser = true;
 					}
 					personsFetch = null;
