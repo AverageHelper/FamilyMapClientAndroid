@@ -1,6 +1,11 @@
 package com.example.familymapclient;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +46,8 @@ import java.util.Set;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -378,6 +385,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		addLinesToMap(settings, map);
 	}
 	
+	public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId, @NonNull Color color) {
+		// https://stackoverflow.com/a/38244327/3799856
+		
+		Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			drawable = (DrawableCompat.wrap(drawable)).mutate();
+		}
+		
+		Bitmap bitmap = Bitmap.createBitmap(
+			drawable.getIntrinsicWidth() * 2,
+			drawable.getIntrinsicHeight() * 2,
+			Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+		drawable.setColorFilter(color.colorValue(), android.graphics.PorterDuff.Mode.SRC_IN);
+		drawable.draw(canvas);
+		
+		return bitmap;
+	}
+	
 	private void addEventMarkersToMap(@NonNull Set<Event> events, @NonNull GoogleMap map) {
 		for (Event event : events) {
 			if (event.getLatitude() != null && event.getLongitude() != null) {
@@ -386,7 +413,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 				
 				MarkerOptions options = new MarkerOptions()
 					.position(location)
-					.icon(BitmapDescriptorFactory.defaultMarker(color.value()));
+					.icon(BitmapDescriptorFactory.fromBitmap(
+						getBitmapFromVectorDrawable(getContext(), R.drawable.ic_map_marker, color)
+					));
 				
 				Marker marker = map.addMarker(options);
 				marker.setTag(event);

@@ -98,8 +98,7 @@ public class ListItem extends ConstraintLayout {
 		));
 		Color color = eventCache.colorForEvent(event);
 		getImageView().setImageResource(R.drawable.ic_map_marker);
-		// FIXME: How do we properly pass this in?
-		getImageView().setColorFilter((int) color.value());
+		getImageView().setColorFilter(color.colorValue(), android.graphics.PorterDuff.Mode.SRC_IN);
 		
 		if (person != null) {
 			getDetailLabel().setText(getContext().getString(
