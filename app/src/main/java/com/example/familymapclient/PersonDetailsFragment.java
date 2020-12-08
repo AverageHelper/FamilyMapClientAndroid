@@ -16,6 +16,7 @@ import com.example.familymapclient.data.FilterType;
 import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.Relationship;
 import com.example.familymapclient.data.UISettings;
+import com.example.familymapclient.ui.ListItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -393,90 +394,16 @@ public class PersonDetailsFragment extends Fragment {
 		}
 		
 		@Override
-		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-			View cell;
-			if (convertView != null) {
-				cell = convertView;
+		public ListItem getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+			ListItem cell;
+			if (convertView != null && convertView.getClass().equals(ListItem.class)) {
+				cell = (ListItem) convertView;
 			} else {
-				LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-				cell = layoutInflater.inflate(R.layout.listview_title_detail_icon, parent, false);
+				cell = ListItem.inflate(parent);
 			}
 			
-			TextView titleLabel = cell.findViewById(R.id.title_label);
-			TextView detailLabel = cell.findViewById(R.id.detail_label);
-			ImageView imageView = cell.findViewById(R.id.image_view);
-			
-			@Nullable Object child = getChild(groupPosition, childPosition);
-			
-			if (child == null) {
-				return cell;
-			}
-			
-			if (child.getClass().equals(Event.class)) {
-				Event event = (Event) child;
-				Person person = personCache.getValueWithID(event.getPersonID());
-				
-				titleLabel.setText(getString(
-					R.string.arg_event_description_short,
-					event.getEventType().toUpperCase(),
-					event.getCity(),
-					event.getCountry(),
-					event.getYear()
-				));
-				Color color = eventCache.colorForEvent(event);
-				imageView.setImageBitmap(null);
-				// FIXME: How do we properly pass this in?
-				imageView.setColorFilter((int) color.value());
-				
-				if (person != null) {
-					detailLabel.setText(getString(
-						R.string.arg_full_name,
-						person.getFirstName(),
-						person.getLastName()
-					));
-				}
-				
-			} else if (child.getClass().equals(Relationship.class)) {
-				Relationship relationship = (Relationship) child;
-				Person person = relationship.getOther();
-				
-				titleLabel.setText(getString(
-					R.string.arg_full_name,
-					person.getFirstName(),
-					person.getLastName()
-				));
-				
-				switch (relationship.getRelationshipType()) {
-					case FATHER:
-						detailLabel.setText(R.string.person_relationship_father);
-						break;
-						
-					case MOTHER:
-						detailLabel.setText(R.string.person_relationship_mother);
-						break;
-						
-					case SPOUSE:
-						detailLabel.setText(R.string.person_relationship_spouse);
-						break;
-						
-					case CHILD:
-						detailLabel.setText(R.string.person_relationship_child);
-						break;
-						
-					default:
-						detailLabel.setText(relationship.getRelationshipType().name());
-						break;
-				}
-				
-				switch (person.getGender()) {
-					case MALE:
-						imageView.setImageResource(R.drawable.ic_iconmonstr_male);
-						break;
-					case FEMALE:
-						imageView.setImageResource(R.drawable.ic_iconmonstr_female);
-						break;
-				}
-			}
+			Object value = getChild(groupPosition, childPosition);
+			cell.setValue(value);
 			
 			return cell;
 		}
