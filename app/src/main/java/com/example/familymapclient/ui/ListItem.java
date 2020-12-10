@@ -111,6 +111,8 @@ public class ListItem extends ConstraintLayout {
 				person.getFirstName(),
 				person.getLastName()
 			));
+		} else {
+			getDetailLabel().setText("");
 		}
 	}
 	
@@ -124,6 +126,7 @@ public class ListItem extends ConstraintLayout {
 			person.getFirstName(),
 			person.getLastName()
 		));
+		getDetailLabel().setText("");
 		switch (person.getGender()) {
 			case MALE:
 				getImageView().setImageResource(R.drawable.ic_iconmonstr_male);

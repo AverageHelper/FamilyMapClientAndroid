@@ -5,6 +5,7 @@ import com.example.familymapclient.auth.NonNullValueHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import model.Event;
 import model.Person;
@@ -26,14 +27,14 @@ public class SearchManager {
 	}
 	
 	public void cancelSearch() {
-		runNewSearchWithQuery(null);
+		// TODO: Stop any active async operation
 	}
 	
 	/**
 	 * Cancels any pending search operation and begins a new one with the provided query.
-	 * @param query The search query to use, or <code>null</code> to cancel previous search operations.
+	 * @param query The search query to use.
 	 */
-	public void runNewSearchWithQuery(@Nullable String query) {
+	public void runNewSearchWithQuery(@NonNull String query) {
 		if (callback == null) { return; }
 		
 		// TODO: Run this in the background

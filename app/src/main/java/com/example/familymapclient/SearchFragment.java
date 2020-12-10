@@ -65,6 +65,7 @@ public class SearchFragment extends Fragment {
 		SearchAdapter adapter = new SearchAdapter();
 		resultsList.setAdapter(adapter);
 		search.setCallback(adapter::setResults);
+		search.runNewSearchWithQuery("");
 	}
 	
 	private void setupSearchBar() {
@@ -81,7 +82,8 @@ public class SearchFragment extends Fragment {
 				return true;
 			}
 		});
-		searchBar.requestFocus();
+		searchBar.setQueryHint(getString(R.string.person_event_search_hint));
+		searchBar.requestFocusFromTouch();
 	}
 	
 	private void addDividersToList(@NonNull RecyclerView listView) {

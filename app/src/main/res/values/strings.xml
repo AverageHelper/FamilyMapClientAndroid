@@ -18,6 +18,7 @@
     <!-- Loading Labels -->
     <string name="loading_state_fetching_events">Fetching events&#8230;</string>
     <string name="loading_state_fetching_persons">Fetching persons&#8230;</string>
+    <string name="loading_state_search">Searching&#8230;</string>
 
     <!-- Login -->
     <string name="login_fragment_label_server_host">Server Host</string>
@@ -75,6 +76,9 @@
     <string name="person_relationship_mother">Mother</string>
     <string name="person_relationship_spouse">Spouse</string>
     <string name="person_relationship_child">Child</string>
+
+    <!-- Search -->
+    <string name="person_event_search_hint">Johnny Appleseed</string>
 
     <!-- Identifiers -->
     <string name="preference_file_key">com.example.familymapclient.PREFERENCE_FILE_KEY</string>
