@@ -11,9 +11,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FamilyMapClient">
         <activity
+            android:name=".SearchActivity"
+            android:label="@string/title_activity_search"
+            android:theme="@style/Theme.FamilyMapClient.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
             android:name=".EventActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.FamilyMapClient.NoActionBar"></activity>
+            android:theme="@style/Theme.FamilyMapClient.NoActionBar" />
         <activity
             android:name=".PersonActivity"
             android:label="@string/title_activity_person"
@@ -41,10 +49,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCBRwqJtIN5O9lk63IfDwp_-9uH4ksMYFU" />
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

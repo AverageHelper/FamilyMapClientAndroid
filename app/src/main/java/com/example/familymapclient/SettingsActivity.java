@@ -19,6 +19,7 @@ public class SettingsActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.activity_settings);
 		if (savedInstanceState == null) {
 			getSupportFragmentManager()
@@ -26,6 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
 				.replace(R.id.settings, new SettingsFragment())
 				.commit();
 		}
+		
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);

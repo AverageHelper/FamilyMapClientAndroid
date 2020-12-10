@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,7 +81,7 @@ public class EventCache extends IDMap<String, Event> {
 	@Override
 	public void add(@NonNull Event event) {
 		super.add(event);
-		@NonNull String eventType = event.getEventType();
+		@NonNull String eventType = event.getEventType().toUpperCase(Locale.ROOT);
 		eventTypes.add(eventType);
 		
 		// Generate a color for the event
@@ -91,7 +92,7 @@ public class EventCache extends IDMap<String, Event> {
 	public @Nullable Event removeValueWithID(@NonNull String id) {
 		Event event = super.removeValueWithID(id);
 		if (event != null) {
-			eventTypes.remove(event.getEventType());
+			eventTypes.remove(event.getEventType().toUpperCase(Locale.ROOT));
 		}
 		return event;
 	}
@@ -120,7 +121,7 @@ public class EventCache extends IDMap<String, Event> {
 	 * @return a {@link Color} value.
 	 */
 	public @NonNull Color colorForEvent(@NonNull Event event) {
-		String eventType = event.getEventType();
+		String eventType = event.getEventType().toUpperCase(Locale.ROOT);
 		
 		@Nullable Color color = colorsForEvents.get(eventType);
 		if (color == null) {

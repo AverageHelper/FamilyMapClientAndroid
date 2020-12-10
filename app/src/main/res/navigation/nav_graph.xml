@@ -40,9 +40,4 @@
             android:id="@+id/action_LoadingFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/PersonDetailsFragment"
-        android:name="com.example.familymapclient.PersonDetailsFragment"
-        android:label="@string/title_activity_person"
-        tools:layout="@layout/fragment_person_details" />
 </navigation>

@@ -13,6 +13,8 @@ import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.PersonCache;
 import com.example.familymapclient.data.Relationship;
 
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -77,6 +79,9 @@ public class ListItem extends ConstraintLayout {
 		if (value.getClass().equals(Event.class)) {
 			setEvent((Event) value);
 			
+		} else if (value.getClass().equals(Person.class)) {
+			setPerson((Person) value);
+			
 		} else if (value.getClass().equals(Relationship.class)) {
 			setRelationship((Relationship) value);
 		}
@@ -91,7 +96,7 @@ public class ListItem extends ConstraintLayout {
 		
 		getTitleLabel().setText(getContext().getString(
 			R.string.arg_event_description_short,
-			event.getEventType().toUpperCase(),
+			event.getEventType().toUpperCase(Locale.ROOT),
 			event.getCity(),
 			event.getCountry(),
 			event.getYear()
@@ -110,17 +115,33 @@ public class ListItem extends ConstraintLayout {
 	}
 	
 	/**
+	 * Updates the cell's UI elements to reflect details about the provided <code>person</code>.
+	 * @param person The relationship that the cell should describe.
+	 */
+	public void setPerson(@NonNull Person person) {
+		getTitleLabel().setText(getContext().getString(
+			R.string.arg_full_name,
+			person.getFirstName(),
+			person.getLastName()
+		));
+		switch (person.getGender()) {
+			case MALE:
+				getImageView().setImageResource(R.drawable.ic_iconmonstr_male);
+				break;
+			case FEMALE:
+				getImageView().setImageResource(R.drawable.ic_iconmonstr_female);
+				break;
+		}
+	}
+	
+	/**
 	 * Updates the cell's UI elements to reflect details about the provided <code>relationship</code>.
 	 * @param relationship The relationship that the cell should describe.
 	 */
 	public void setRelationship(@NonNull Relationship relationship) {
 		Person person = relationship.getOther();
 		
-		getTitleLabel().setText(getContext().getString(
-			R.string.arg_full_name,
-			person.getFirstName(),
-			person.getLastName()
-		));
+		setPerson(person);
 		
 		switch (relationship.getRelationshipType()) {
 			case FATHER:
@@ -141,15 +162,6 @@ public class ListItem extends ConstraintLayout {
 			
 			default:
 				getDetailLabel().setText(relationship.getRelationshipType().name());
-				break;
-		}
-		
-		switch (person.getGender()) {
-			case MALE:
-				getImageView().setImageResource(R.drawable.ic_iconmonstr_male);
-				break;
-			case FEMALE:
-				getImageView().setImageResource(R.drawable.ic_iconmonstr_female);
 				break;
 		}
 	}

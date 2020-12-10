@@ -55,11 +55,6 @@ public class MainActivity extends UIPreferencesActivity {
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-//		FloatingActionButton fab = findViewById(R.id.fab);
-//		fab
-//			.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//			.setAction("Action", null).show());
-		
 		setupAuthListeners();
 	}
 	
@@ -89,7 +84,7 @@ public class MainActivity extends UIPreferencesActivity {
 			return true;
 			
 		} else if (id == R.id.action_search) {
-			// TODO: Start search activity
+			startSearchActivity();
 			return true;
 		}
 		
@@ -155,6 +150,11 @@ public class MainActivity extends UIPreferencesActivity {
 	private void startSettingsActivity() {
 		Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
 		startActivityForResult(settings, REQUEST_CODE_LOG_OUT);
+	}
+	
+	private void startSearchActivity() {
+		Intent search = new Intent(MainActivity.this, SearchActivity.class);
+		startActivity(search);
 	}
 	
 	

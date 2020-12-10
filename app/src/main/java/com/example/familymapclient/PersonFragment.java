@@ -7,10 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.familymapclient.data.Color;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.FilterType;
 import com.example.familymapclient.data.PersonCache;
@@ -37,7 +35,7 @@ import model.Gender;
 import model.Person;
 import transport.JSONSerialization;
 
-public class PersonDetailsFragment extends Fragment {
+public class PersonFragment extends Fragment {
 	
 	private RecyclerView detailsList;
 	private ExpandableListView lifeEventsList;
@@ -56,7 +54,7 @@ public class PersonDetailsFragment extends Fragment {
 		Bundle savedInstanceState
 	) {
 		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.fragment_person_details, container, false);
+		return inflater.inflate(R.layout.fragment_person, container, false);
 	}
 	
 	public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
