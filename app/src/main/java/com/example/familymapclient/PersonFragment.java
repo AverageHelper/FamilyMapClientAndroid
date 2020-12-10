@@ -174,9 +174,7 @@ public class PersonFragment extends Fragment {
 		RelatedRecordsAdapter adapter = (RelatedRecordsAdapter) parent.getExpandableListAdapter();
 		@Nullable Object child = adapter.getChild(groupPosition, childPosition);
 		
-		if (child == null) {
-			return false;
-		}
+		if (child == null) { return false; }
 		
 		if (child.getClass().equals(Event.class)) {
 			Event event = (Event) child;

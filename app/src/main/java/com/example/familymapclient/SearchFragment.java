@@ -1,5 +1,6 @@
 package com.example.familymapclient;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import model.Event;
+import model.Person;
 
 public class SearchFragment extends Fragment {
 	
@@ -111,6 +114,37 @@ public class SearchFragment extends Fragment {
 		search.runNewSearchWithQuery(query);
 	}
 	
+	private void onChildClick(@Nullable Object value) {
+		if (value == null) { return; }
+		
+		if (value.getClass().equals(Event.class)) {
+			Event event = (Event) value;
+			onEventClick(event);
+			
+		} else if (value.getClass().equals(Person.class)) {
+			Person person = (Person) value;
+			onPersonClick(person);
+		}
+	}
+	
+	private void onEventClick(@NonNull Event event) {
+		startEventActivity(event);
+	}
+	
+	private void onPersonClick(@NonNull Person person) {
+		startPersonActivity(person);
+	}
+	
+	private void startPersonActivity(@NonNull Person person) {
+		Intent personDetails = PersonActivity.newIntent(getActivity(), person);
+		startActivity(personDetails);
+	}
+	
+	private void startEventActivity(@NonNull Event event) {
+		Intent personDetails = EventActivity.newIntent(getActivity(), event);
+		startActivity(personDetails);
+	}
+	
 	/**
 	 * An object that adapts search result data into rows for the search results list.
 	 */
@@ -142,7 +176,9 @@ public class SearchFragment extends Fragment {
 		@Override
 		public void onBindViewHolder(@NonNull SearchAdapter.ViewHolder holder, int position) {
 			Object value = results.get(position);
-			holder.getListItem().setValue(value);
+			ListItem listItem = holder.getListItem();
+			listItem.setValue(value);
+			listItem.setOnClickListener(view -> onChildClick(value));
 		}
 		
 		public class ViewHolder extends RecyclerView.ViewHolder {

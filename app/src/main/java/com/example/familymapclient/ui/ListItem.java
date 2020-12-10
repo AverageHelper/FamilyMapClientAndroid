@@ -127,6 +127,7 @@ public class ListItem extends ConstraintLayout {
 			person.getLastName()
 		));
 		getDetailLabel().setText("");
+		getImageView().setColorFilter(null);
 		switch (person.getGender()) {
 			case MALE:
 				getImageView().setImageResource(R.drawable.ic_iconmonstr_male);

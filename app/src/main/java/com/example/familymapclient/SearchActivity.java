@@ -22,6 +22,17 @@ public class SearchActivity extends AppCompatActivity {
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+		
+		MainActivity.shouldPopToRoot = false;
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (MainActivity.shouldPopToRoot) {
+			finish();
+		}
 	}
 	
 	@Override
