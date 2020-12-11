@@ -118,7 +118,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 			navigateToLoginFragment();
 		}
 		
-		setEvent(null);
+		setEvent(selectedEvent);
 	}
 	
 	@Override
@@ -273,17 +273,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	// ** Events
 	
 	private void setEvent(@Nullable Event event) {
-		this.selectedEvent = event;
-		
-		if (event == null) {
+		if (event == null || !eventMatchesUIFilter(event)) {
+			selectedEvent = null;
 			setPerson(null);
 			imageContainer.setVisibility(View.GONE);
 			loadingIndicator.setVisibility(View.GONE);
 			return;
-		} else {
-			centerMapOnEvent(event);
 		}
 		
+		selectedEvent = event;
+		centerMapOnEvent(event);
 		imageContainer.setVisibility(View.VISIBLE);
 		
 		// Select the person record if we have it, or fetch it if we don't
@@ -344,6 +343,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 		
 		updateMapContents();
+	}
+	
+	private boolean eventMatchesUIFilter(@NonNull Event event) {
+		UISettings settings = getUIPreferences();
+		if (settings == null) { return true; }
+		
+		String personID = event.getPersonID();
+		@Nullable Person person = personCache.getValueWithID(personID);
+		if (person == null) { return true; }
+		
+		if (person.getGender().equals(Gender.MALE) && !settings.isFilterEnabled(FilterType.GENDER_MALE)) {
+			return false;
+		}
+		if (person.getGender().equals(Gender.FEMALE) && !settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	
