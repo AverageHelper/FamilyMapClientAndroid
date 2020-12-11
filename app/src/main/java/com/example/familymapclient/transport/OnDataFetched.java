@@ -12,7 +12,7 @@ public interface OnDataFetched<R> {
 	 * @param task The task that will begin running.
 	 * @param <Task> The type of task.
 	 */
-	public <Task extends RequestTask<?>> void taskWillBeginRunning(@NonNull Task task);
+	<Task extends RequestTask<?>> void taskWillBeginRunning(@NonNull Task task);
 	
 	/**
 	 * Called by a task object when the task receives its <code>didFinishRunning</code> callback.
@@ -20,7 +20,7 @@ public interface OnDataFetched<R> {
 	 * @param response The response returned by the task.
 	 * @param <Task> The type of task.
 	 */
-	public <Task extends RequestTask<?>> void taskDidFinishRunning(@NonNull Task task, @NonNull R response);
+	<Task extends RequestTask<?>> void taskDidFinishRunning(@NonNull Task task, @NonNull R response);
 	
 	/**
 	 * Called by a task object when the task receives its <code>didFail</code> callback.
@@ -28,5 +28,5 @@ public interface OnDataFetched<R> {
 	 * @param error The object that was thrown.
 	 * @param <Task> The type of task.
 	 */
-	public <Task extends RequestTask<?>> void taskDidFail(@NonNull Task task, @NonNull Throwable error);
+	<Task extends RequestTask<?>> void taskDidFail(@NonNull Task task, @NonNull Throwable error);
 }

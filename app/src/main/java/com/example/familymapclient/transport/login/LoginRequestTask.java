@@ -1,6 +1,5 @@
 package com.example.familymapclient.transport.login;
 
-import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RequestFailureException;
 import com.example.familymapclient.transport.RequestTask;
@@ -17,14 +16,6 @@ public class LoginRequestTask extends RequestTask<LoginRequest> {
 	private static final String LOGIN_PATH = "/user/login";
 	
 	private final @Nullable OnDataFetched<String> listener;
-	
-	public LoginRequestTask(
-		@NonNull MutableServerLocation location,
-		@Nullable LoginRequest req,
-		@Nullable OnDataFetched<String> listener
-	) {
-		this(new ServerLocation(location), req, listener);
-	}
 	
 	public LoginRequestTask(
 		@NonNull ServerLocation location,

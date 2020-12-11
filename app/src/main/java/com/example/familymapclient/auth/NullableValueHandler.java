@@ -4,5 +4,5 @@ import androidx.annotation.Nullable;
 
 @FunctionalInterface
 public interface NullableValueHandler<T> {
-	public void call(@Nullable T val);
+	void call(@Nullable T val);
 }

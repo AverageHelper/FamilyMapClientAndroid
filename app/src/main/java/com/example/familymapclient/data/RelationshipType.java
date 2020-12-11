@@ -4,5 +4,5 @@ public enum RelationshipType {
 	FATHER,
 	MOTHER,
 	SPOUSE,
-	CHILD;
+	CHILD
 }

@@ -29,7 +29,7 @@ import com.example.familymapclient.transport.ServerLocation;
  */
 public class LoadingFragment extends Fragment {
 	
-	public Auth auth = Auth.shared();
+	private final Auth auth = Auth.shared();
 	private @Nullable Integer signedInHandler = null;
 	
 	private final PersonCache personCache = PersonCache.shared();

@@ -29,7 +29,7 @@ import model.Gender;
 
 public class LoginFragment extends Fragment {
 	
-	public Auth auth = Auth.shared();
+	private final Auth auth = Auth.shared();
 	private @Nullable Integer signedInHandler = null;
 	private @Nullable Integer loginFailureHandler = null;
 	

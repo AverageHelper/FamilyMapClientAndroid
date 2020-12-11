@@ -39,7 +39,6 @@ public class UIPreferencesActivity extends AppCompatActivity implements SharedPr
 	@Override
 	public void onSharedPreferenceChanged(@NonNull SharedPreferences sharedPreferences, String key) {
 		readPreferenceValuesIntoUISettings(sharedPreferences);
-		// TODO: Inform fragments (?)
 	}
 	
 	private void readPreferenceValuesIntoUISettings(@NonNull SharedPreferences sharedPreferences) {

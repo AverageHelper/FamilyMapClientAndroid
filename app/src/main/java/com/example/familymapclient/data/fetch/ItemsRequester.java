@@ -2,7 +2,6 @@ package com.example.familymapclient.data.fetch;
 
 import com.example.familymapclient.async.TaskRunner;
 import com.example.familymapclient.auth.NonNullValueHandler;
-import com.example.familymapclient.transport.GetRequest;
 import com.example.familymapclient.transport.GetRequestTask;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RequestTask;
@@ -23,7 +22,7 @@ public abstract class ItemsRequester<Value extends ModelData> implements OnDataF
 	private @Nullable List<Value> values;
 	private @Nullable Throwable fetchError;
 	private @Nullable TaskRunner runner;
-	private @NonNull NonNullValueHandler<List<Value>> onSuccess;
+	private final @NonNull NonNullValueHandler<List<Value>> onSuccess;
 	private final @NonNull NonNullValueHandler<Throwable> onFailure;
 	
 	private final @NonNull ServerLocation location;
@@ -67,19 +66,12 @@ public abstract class ItemsRequester<Value extends ModelData> implements OnDataF
 		return fetchError;
 	}
 	
-	/**
-	 * @return <code>true</code> if the task is presently running.
-	 */
-	public boolean isRunning() {
-		return runner != null;
-	}
-	
 	
 	/**
-	 *
-	 * @param location
-	 * @param authToken
-	 * @return
+	 * Retrieves a {@link GetRequestTask} to run.
+	 * @param location The server's internet address information.
+	 * @param authToken The user's auth token.
+	 * @return A {@link GetRequestTask} to run.
 	 */
 	public abstract @NonNull GetRequestTask getRequestTask(
 		@NonNull ServerLocation location,

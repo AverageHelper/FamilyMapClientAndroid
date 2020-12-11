@@ -38,7 +38,6 @@ public class SearchManager {
 	}
 	
 	public void cancelSearch() {
-		// TODO: Stop any active async operation
 		runNewSearchWithQuery("");
 	}
 	
@@ -50,7 +49,6 @@ public class SearchManager {
 		previousQuery = query;
 		if (callback == null) { return; }
 		
-		// TODO: Run this in the background
 		List<Object> results = new ArrayList<>();
 		
 		String q = query.toLowerCase().trim();

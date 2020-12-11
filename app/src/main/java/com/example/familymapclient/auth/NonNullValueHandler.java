@@ -4,5 +4,5 @@ import androidx.annotation.NonNull;
 
 @FunctionalInterface
 public interface NonNullValueHandler<T> {
-	public void call(@NonNull T val);
+	void call(@NonNull T val);
 }

@@ -5,15 +5,20 @@ import java.net.URL;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import transport.JSONSerialization;
 
 /**
  * An object that represents a server hostname, port number, and protocol.
  */
-public class ServerLocation {
-	private final @NonNull MutableServerLocation location;
+public class ServerLocation extends JSONSerialization {
+	private @Nullable String hostname;
+	private @Nullable Integer portNumber;
+	private boolean usesSecureProtocol;
 	
 	public ServerLocation() {
-		this.location = new MutableServerLocation();
+		this.hostname = null;
+		this.portNumber = null;
+		this.usesSecureProtocol = false;
 	}
 	
 	public ServerLocation(
@@ -21,23 +26,33 @@ public class ServerLocation {
 		@Nullable Integer portNumber,
 		boolean usesSecureProtocol
 	) {
-		this.location = new MutableServerLocation(hostname, portNumber, usesSecureProtocol);
-	}
-	
-	public ServerLocation(@NonNull MutableServerLocation location) {
-		this.location = location;
+		this.hostname = hostname;
+		this.portNumber = portNumber;
+		this.usesSecureProtocol = usesSecureProtocol;
 	}
 	
 	public @Nullable String getHostname() {
-		return location.getHostname();
+		return hostname;
+	}
+	
+	public void setHostname(@Nullable String hostname) {
+		this.hostname = hostname;
 	}
 	
 	public @Nullable Integer getPortNumber() {
-		return location.getPortNumber();
+		return portNumber;
+	}
+	
+	public void setPortNumber(@Nullable Integer portNumber) {
+		this.portNumber = portNumber;
 	}
 	
 	public boolean usesSecureProtocol() {
-		return location.usesSecureProtocol();
+		return usesSecureProtocol;
+	}
+	
+	public void setUsesSecureProtocol(boolean usesSecureProtocol) {
+		this.usesSecureProtocol = usesSecureProtocol;
 	}
 	
 	/**
@@ -48,11 +63,26 @@ public class ServerLocation {
 	 * @throws MalformedURLException if the stored properties do not form a proper URL.
 	 */
 	public @NonNull URL getURL(@NonNull String path) throws MalformedURLException {
-		return location.getURL(path);
+		String secure = usesSecureProtocol() ? "s" : "";
+		@NonNull String hostName = "localhost";
+		@NonNull Integer portNumber = usesSecureProtocol() ? 43 : 80;
+		if (getHostname() != null) {
+			hostName = getHostname();
+		}
+		if (getPortNumber() != null) {
+			portNumber = getPortNumber();
+		}
+		return new URL("http" + secure + "://" + hostName + ":" + portNumber + path);
 	}
 	
 	@Override
-	public String toString() {
-		return location.toString();
+	public void assertCorrectDeserialization() {}
+	
+	@Override
+	public @NonNull String toString() {
+		String protocol = usesSecureProtocol
+			? "https"
+			: "http";
+		return protocol + "://" + hostname + ":" + portNumber;
 	}
 }

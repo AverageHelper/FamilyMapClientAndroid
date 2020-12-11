@@ -20,7 +20,6 @@ import model.Event;
 import model.Person;
 
 public class EventCache extends IDMap<String, Event> {
-	private final @NonNull CountedSet<String> eventTypes;
 	private final @NonNull Map<String, Color> colorsForEvents;
 	private final @NonNull Set<Color> unusedColors;
 	private final @NonNull Map<Integer, NonNullValueHandler<EventCache>> cacheDidUpdateHandler;
@@ -35,7 +34,6 @@ public class EventCache extends IDMap<String, Event> {
 	
 	private EventCache() {
 		super();
-		this.eventTypes = new CountedSet<>();
 		this.colorsForEvents = new HashMap<>();
 		this.cacheDidUpdateHandler = new HashMap<>();
 		this.unusedColors = new HashSet<>(Color.allValues());
@@ -71,30 +69,12 @@ public class EventCache extends IDMap<String, Event> {
 	
 	
 	
-	/**
-	 * @return the set of all known event types.
-	 */
-	public @NonNull Set<String> getEventTypes() {
-		return eventTypes;
-	}
-	
 	@Override
 	public void add(@NonNull Event event) {
 		super.add(event);
-		@NonNull String eventType = event.getEventType().toUpperCase(Locale.ROOT);
-		eventTypes.add(eventType);
 		
 		// Generate a color for the event
 		colorForEvent(event);
-	}
-	
-	@Override
-	public @Nullable Event removeValueWithID(@NonNull String id) {
-		Event event = super.removeValueWithID(id);
-		if (event != null) {
-			eventTypes.remove(event.getEventType().toUpperCase(Locale.ROOT));
-		}
-		return event;
 	}
 	
 	private @NonNull Color randomUnusedColor() {

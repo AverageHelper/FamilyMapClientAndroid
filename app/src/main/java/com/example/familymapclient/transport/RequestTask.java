@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -116,10 +117,19 @@ public abstract class RequestTask<Request extends JSONSerialization> implements 
 	 * @throws IOException if there was a problem reading UTF-8 bytes from the stream.
 	 */
 	private @NonNull String readString(@NonNull InputStream stream) throws IOException {
-		BufferedReader httpInput = new BufferedReader(new InputStreamReader(
-			stream,
-			"UTF-8"
-		));
+		BufferedReader httpInput;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+			httpInput = new BufferedReader(new InputStreamReader(
+				stream,
+				StandardCharsets.UTF_8
+			));
+		} else {
+			//noinspection CharsetObjectCanBeUsed
+			httpInput = new BufferedReader(new InputStreamReader(
+				stream,
+				"UTF-8"
+			));
+		}
 		StringBuilder in = new StringBuilder();
 		String input;
 		while ((input = httpInput.readLine()) != null) {

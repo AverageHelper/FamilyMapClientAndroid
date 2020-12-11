@@ -70,13 +70,6 @@ public class PersonRequester implements OnDataFetched<String> {
 		return fetchError;
 	}
 	
-	/**
-	 * @return <code>true</code> if the task is presently running.
-	 */
-	public boolean isRunning() {
-		return runner != null;
-	}
-	
 	
 	/**
 	 * Sends the request to the server.

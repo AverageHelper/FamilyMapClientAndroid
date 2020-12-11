@@ -1,7 +1,6 @@
 package com.example.familymapclient.transport.persons;
 
 import com.example.familymapclient.transport.GetRequestTask;
-import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RequestFailureException;
 import com.example.familymapclient.transport.ServerLocation;
@@ -14,15 +13,6 @@ public class PersonRequestTask extends GetRequestTask {
 	
 	private final @NonNull String authToken;
 	private final @Nullable OnDataFetched<String> listener;
-	
-	public PersonRequestTask(
-		@NonNull MutableServerLocation location,
-		@NonNull String personID,
-		@NonNull String authToken,
-		@Nullable OnDataFetched<String> listener
-	) {
-		this(new ServerLocation(location), personID, authToken, listener);
-	}
 	
 	public PersonRequestTask(
 		@NonNull ServerLocation location,

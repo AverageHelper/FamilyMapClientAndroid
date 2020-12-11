@@ -59,7 +59,7 @@ import transport.JSONSerialization;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
-	public Auth auth = Auth.shared();
+	private final Auth auth = Auth.shared();
 	private @Nullable Integer eventCacheHandler = null;
 	
 	private final PersonCache personCache = PersonCache.shared();

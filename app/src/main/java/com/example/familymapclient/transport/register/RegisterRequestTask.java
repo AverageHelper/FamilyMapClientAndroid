@@ -1,6 +1,5 @@
 package com.example.familymapclient.transport.register;
 
-import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.RequestFailureException;
 import com.example.familymapclient.transport.RequestTask;
@@ -17,14 +16,6 @@ public class RegisterRequestTask extends RequestTask<RegisterRequest> {
 	private static final String REGISTER_PATH = "/user/register";
 	
 	private final @Nullable OnDataFetched<String> listener;
-	
-	public RegisterRequestTask(
-		@NonNull MutableServerLocation location,
-		@Nullable RegisterRequest req,
-		@Nullable OnDataFetched<String> listener
-	) {
-		this(new ServerLocation(location), req, listener);
-	}
 	
 	public RegisterRequestTask(
 		@NonNull ServerLocation location,

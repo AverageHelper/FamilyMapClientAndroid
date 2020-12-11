@@ -2,10 +2,10 @@ package com.example.familymapclient.auth;
 
 import com.example.familymapclient.async.TaskRunner;
 import com.example.familymapclient.data.PersistentStore;
+import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.login.LoginFailureReason;
 import com.example.familymapclient.transport.login.LoginRequestTask;
-import com.example.familymapclient.transport.MutableServerLocation;
 import com.example.familymapclient.transport.OnDataFetched;
 import com.example.familymapclient.transport.register.RegisterException;
 import com.example.familymapclient.transport.register.RegisterFailureReason;
@@ -33,7 +33,7 @@ public class Auth implements OnDataFetched<String> {
 	private @Nullable String personID;
 	private @Nullable Throwable loginError;
 	private @Nullable TaskRunner runner;
-	private final @NonNull MutableServerLocation location;
+	private final @NonNull ServerLocation location;
 	private @Nullable PersistentStore persistentStore;
 	
 	private final @NonNull Map<Integer, NullableValueHandler<String>> authStateDidChangeHandlers;
@@ -44,7 +44,7 @@ public class Auth implements OnDataFetched<String> {
 		this.personID = null;
 		this.loginError = null;
 		this.runner = null;
-		this.location = new MutableServerLocation();
+		this.location = new ServerLocation();
 		this.authStateDidChangeHandlers = new HashMap<>();
 		this.authStateDidFailToChangeHandlers = new HashMap<>();
 		this.persistentStore = null;
@@ -346,9 +346,7 @@ public class Auth implements OnDataFetched<String> {
 	
 	// ** Login Callbacks
 	
-	public void taskWillBeginRunning(@NonNull LoginRequestTask task) {
-		// Tell fragments to update?
-	}
+	public void taskWillBeginRunning(@NonNull LoginRequestTask task) {}
 	
 	public void taskDidFinishRunning(@NonNull LoginRequestTask task, @NonNull String response) {
 		try {

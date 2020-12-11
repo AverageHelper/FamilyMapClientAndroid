@@ -240,8 +240,8 @@ public class PersonFragment extends Fragment {
 		
 		public class ViewHolder extends RecyclerView.ViewHolder {
 			
-			public TextView titleLabel;
-			public TextView detailLabel;
+			public final TextView titleLabel;
+			public final TextView detailLabel;
 			
 			public ViewHolder(View itemView) {
 				super(itemView);

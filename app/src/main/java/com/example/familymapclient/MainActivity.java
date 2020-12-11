@@ -1,7 +1,6 @@
 package com.example.familymapclient;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.familymapclient.auth.Auth;
@@ -9,13 +8,10 @@ import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.KeyValueStore;
 import com.example.familymapclient.data.PersistentStore;
 import com.example.familymapclient.data.PersonCache;
-import com.example.familymapclient.data.UISettings;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.preference.PreferenceManager;
 
 import android.view.Menu;
 import android.view.MenuItem;
