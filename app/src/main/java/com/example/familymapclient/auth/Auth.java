@@ -2,6 +2,7 @@ package com.example.familymapclient.auth;
 
 import com.example.familymapclient.async.TaskRunner;
 import com.example.familymapclient.data.PersistentStore;
+import com.example.familymapclient.data.PersonIDProvider;
 import com.example.familymapclient.transport.ServerLocation;
 import com.example.familymapclient.transport.login.LoginException;
 import com.example.familymapclient.transport.login.LoginFailureReason;
@@ -25,7 +26,7 @@ import responses.RegisterResponse;
 import transport.JSONSerialization;
 import transport.MissingKeyException;
 
-public class Auth implements OnDataFetched<String> {
+public class Auth implements OnDataFetched<String>, PersonIDProvider {
 	private static final String STORED_AUTH_TOKEN = "STORED_AUTH_TOKEN";
 	private static final String STORED_PERSON_ID = "STORED_PERSON_ID";
 	
@@ -69,9 +70,7 @@ public class Auth implements OnDataFetched<String> {
 		return authToken;
 	}
 	
-	/**
-	 * @return The user's person ID if the user is signed in. <code>null</code> otherwise.
-	 */
+	@Override
 	public @Nullable String getPersonID() {
 		return personID;
 	}

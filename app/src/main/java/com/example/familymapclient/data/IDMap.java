@@ -14,19 +14,14 @@ import model.Identifiable;
  * @param <ID> The type that is used to identify each element.
  * @param <Element> The type of element that can be stored.
  */
-public class IDMap<ID, Element extends Identifiable<ID>> {
+public class IDMap<ID, Element extends Identifiable<ID>> implements DataProvider<ID, Element> {
 	private final @NonNull Map<ID, Element> values;
 	
 	public IDMap() {
 		this.values = new HashMap<>();
 	}
 	
-	/**
-	 * Retrieves an element with the given <code>id</code>, or <code>null</code> if no such element is known.
-	 *
-	 * @param id The unique identifier of the element to retrieve.
-	 * @return A matching element, or <code>null</code> if no known element matches.
-	 */
+	@Override
 	public @Nullable Element getValueWithID(@NonNull ID id) {
 		return values.get(id);
 	}
@@ -75,9 +70,7 @@ public class IDMap<ID, Element extends Identifiable<ID>> {
 		return values.remove(id);
 	}
 	
-	/**
-	 * Returns a Collection view of the values contained in this map.
-	 */
+	@Override
 	public @NonNull Collection<Element> values() {
 		return this.values.values();
 	}

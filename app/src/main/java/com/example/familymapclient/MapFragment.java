@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.data.Color;
+import com.example.familymapclient.data.DataFilter;
 import com.example.familymapclient.data.EventCache;
 import com.example.familymapclient.data.FilterType;
 import com.example.familymapclient.data.LineType;
@@ -64,6 +65,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	
 	private final PersonCache personCache = PersonCache.shared();
 	private final EventCache eventCache = EventCache.shared();
+	private final DataFilter filter = new DataFilter(personCache);
 	
 	private MapView mapView;
 	private @Nullable GoogleMap map = null;
@@ -405,12 +407,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		if (person.getId().equals(currentUser.getSpouseID())) { return true; }
 		
 		if (!settings.isFilterEnabled(FilterType.SIDE_FATHER) &&
-			personCache.personIsOnFathersSide(currentUser, person)) {
+			filter.personIsOnFathersSide(currentUser, person)) {
 			return false;
 		}
 		
 		return settings.isFilterEnabled(FilterType.SIDE_MOTHER) ||
-			!personCache.personIsOnMothersSide(currentUser, person);
+			!filter.personIsOnMothersSide(currentUser, person);
 	}
 	
 	

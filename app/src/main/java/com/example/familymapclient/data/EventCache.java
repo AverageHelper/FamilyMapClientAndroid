@@ -19,7 +19,7 @@ import androidx.annotation.Nullable;
 import model.Event;
 import model.Person;
 
-public class EventCache extends IDMap<String, Event> {
+public class EventCache extends IDMap<String, Event> implements DataProvider<String, Event> {
 	private final @NonNull Map<String, Color> colorsForEvents;
 	private final @NonNull Set<Color> unusedColors;
 	private final @NonNull Map<Integer, NonNullValueHandler<EventCache>> cacheDidUpdateHandler;

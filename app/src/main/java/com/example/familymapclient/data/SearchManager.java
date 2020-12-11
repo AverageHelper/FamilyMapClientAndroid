@@ -17,13 +17,42 @@ import model.Person;
  * An object that manages a single search operation.
  */
 public class SearchManager {
-	private final PersonCache personCache = PersonCache.shared();
-	private final EventCache eventCache = EventCache.shared();
-	private final Auth auth = Auth.shared();
+	private final @NonNull DataProvider<String, Person> personCache;
+	private final @NonNull DataProvider<String, Event> eventCache;
+	private final @NonNull PersonIDProvider personIDProvider;
+	private final @NonNull DataFilter filter;
+	
+	public SearchManager() {
+		this(Auth.shared());
+	}
+	
+	public SearchManager(
+		@NonNull PersonIDProvider personIDProvider
+	) {
+		this(PersonCache.shared(), personIDProvider);
+	}
+	
+	public SearchManager(
+		@NonNull DataProvider<String, Person> personCache,
+		@NonNull PersonIDProvider personIDProvider
+	) {
+		this(personCache, EventCache.shared(), personIDProvider);
+	}
+	
+	public SearchManager(
+		@NonNull DataProvider<String, Person> personCache,
+		@NonNull DataProvider<String, Event> eventCache,
+		@NonNull PersonIDProvider personIDProvider
+	) {
+		this.personCache = personCache;
+		this.eventCache = eventCache;
+		this.personIDProvider = personIDProvider;
+		this.filter = new DataFilter(personCache);
+	}
 	
 	private @NonNull String previousQuery = "";
 	private @Nullable NonNullValueHandler<List<Object>> callback = null;
-	private @Nullable UISettings filter = null;
+	private @Nullable UISettings settings = null;
 	
 	public void setCallback(@Nullable NonNullValueHandler<List<Object>> callback) {
 		this.callback = callback;
@@ -32,8 +61,8 @@ public class SearchManager {
 		}
 	}
 	
-	public void setFilter(@Nullable UISettings filter) {
-		this.filter = filter;
+	public void setSettings(@Nullable UISettings settings) {
+		this.settings = settings;
 		runNewSearchWithQuery(previousQuery);
 	}
 	
@@ -108,23 +137,23 @@ public class SearchManager {
 	}
 	
 	private boolean eventMatchesUIFilter(@NonNull Event event) {
-		if (filter == null) { return true; }
+		if (settings == null) { return true; }
 		
 		String personID = event.getPersonID();
 		@Nullable Person person = personCache.getValueWithID(personID);
 		if (person == null) { return true; }
 		
-		if (person.getGender().equals(Gender.MALE) && !filter.isFilterEnabled(FilterType.GENDER_MALE)) {
+		if (person.getGender().equals(Gender.MALE) && !settings.isFilterEnabled(FilterType.GENDER_MALE)) {
 			return false;
 		}
 		return !person.getGender().equals(Gender.FEMALE) ||
-			filter.isFilterEnabled(FilterType.GENDER_FEMALE);
+			settings.isFilterEnabled(FilterType.GENDER_FEMALE);
 	}
 	
 	private boolean personMatchesUIFilter(@NonNull Person person) {
-		if (filter == null) { return true; }
+		if (settings == null) { return true; }
 		
-		String currentUserId = auth.getPersonID();
+		String currentUserId = personIDProvider.getPersonID();
 		if (currentUserId == null) { return true; }
 		
 		Person currentUser = personCache.getValueWithID(currentUserId);
@@ -132,13 +161,13 @@ public class SearchManager {
 		
 		if (person.getId().equals(currentUser.getSpouseID())) { return true; }
 		
-		if (!filter.isFilterEnabled(FilterType.SIDE_FATHER) &&
-			personCache.personIsOnFathersSide(currentUser, person)) {
+		if (!settings.isFilterEnabled(FilterType.SIDE_FATHER) &&
+			filter.personIsOnFathersSide(currentUser, person)) {
 			return false;
 		}
 		
-		return filter.isFilterEnabled(FilterType.SIDE_MOTHER) ||
-			!personCache.personIsOnMothersSide(currentUser, person);
+		return settings.isFilterEnabled(FilterType.SIDE_MOTHER) ||
+			!filter.personIsOnMothersSide(currentUser, person);
 	}
 	
 }
