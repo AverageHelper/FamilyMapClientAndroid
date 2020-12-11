@@ -132,6 +132,8 @@ public class SearchManager {
 		Person currentUser = personCache.getValueWithID(currentUserId);
 		if (currentUser == null) { return false; }
 		
+		if (person.getId().equals(currentUser.getSpouseID())) { return true; }
+		
 		if (!filter.isFilterEnabled(FilterType.SIDE_FATHER) &&
 			personCache.personIsOnFathersSide(currentUser, person)) {
 			return false;

@@ -402,6 +402,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		Person currentUser = personCache.getValueWithID(currentUserId);
 		if (currentUser == null) { return false; }
 		
+		if (person.getId().equals(currentUser.getSpouseID())) { return true; }
+		
 		if (!settings.isFilterEnabled(FilterType.SIDE_FATHER) &&
 			personCache.personIsOnFathersSide(currentUser, person)) {
 			return false;
