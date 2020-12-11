@@ -505,7 +505,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	}
 	
 	private void drawSpouseLine(@NonNull Event event, @NonNull Person subject, @NonNull GoogleMap map) {
-		Color color = eventCache.colorForEvent(event);
+		Color color = Color.AZURE;
 		String spouseId = subject.getSpouseID();
 		if (spouseId == null) { return; }
 		
@@ -513,9 +513,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		if (spouseEvents.isEmpty()) { return; }
 		Event birthEvent = spouseEvents.get(0);
 		
+		List<LatLng> locations = new ArrayList<>();
 		if (birthEvent.getLatitude() != null && birthEvent.getLongitude() != null) {
+			locations.add(new LatLng(birthEvent.getLatitude(), birthEvent.getLongitude()));
+		}
+		if (event.getLatitude() != null && event.getLongitude() != null) {
+			locations.add(new LatLng(event.getLatitude(), event.getLongitude()));
+		}
+		
+		if (locations.size() == 2) {
 			map.addPolyline(new PolylineOptions()
-				.add(new LatLng(birthEvent.getLatitude(), birthEvent.getLongitude()))
+				.addAll(locations)
 				.width(10)
 				.color(color.colorValue())
 			);
@@ -527,7 +535,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 	}
 	
 	private void drawFamilyTreeLines(@NonNull Event event, @NonNull Person subject, @NonNull GoogleMap map, int lineWidth, @NonNull Set<Event> drawnEvents) {
-		Color color = Color.BLUE; //eventCache.colorForEvent(event);
+		Color color = Color.BLUE;
 		
 		Set<String> parentsIDs = new HashSet<>();
 		String fatherId = subject.getFatherID();
