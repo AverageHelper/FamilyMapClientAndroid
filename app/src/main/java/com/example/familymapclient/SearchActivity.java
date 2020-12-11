@@ -8,7 +8,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.MenuItem;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends UIPreferencesActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

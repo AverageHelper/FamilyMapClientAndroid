@@ -8,10 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.example.familymapclient.data.SearchManager;
+import com.example.familymapclient.data.UISettings;
 import com.example.familymapclient.ui.ListItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,6 +51,12 @@ public class SearchFragment extends Fragment {
 		findChildViews(view);
 		setupDetailsList();
 		setupSearchBar();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		search.setFilter(getUIPreferences());
 	}
 	
 	@Override
@@ -98,6 +106,16 @@ public class SearchFragment extends Fragment {
 			listView.addItemDecoration(dividerItemDecoration);
 			listView.setLayoutManager(layoutManager);
 		}
+	}
+	
+	private @Nullable UISettings getUIPreferences() {
+		if (getActivity() != null &&
+			UIPreferencesActivity.class.isAssignableFrom(getActivity().getClass())
+		) {
+			UIPreferencesActivity activity = (UIPreferencesActivity) getActivity();
+			return Objects.requireNonNull(activity).getUISettings();
+		}
+		return null;
 	}
 	
 	private void setLoadingSearchResults(boolean isLoading) {

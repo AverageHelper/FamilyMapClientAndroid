@@ -356,11 +356,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		if (person.getGender().equals(Gender.MALE) && !settings.isFilterEnabled(FilterType.GENDER_MALE)) {
 			return false;
 		}
-		if (person.getGender().equals(Gender.FEMALE) && !settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
-			return false;
-		}
-		
-		return true;
+		return !person.getGender().equals(Gender.FEMALE) ||
+			settings.isFilterEnabled(FilterType.GENDER_FEMALE);
 	}
 	
 	
