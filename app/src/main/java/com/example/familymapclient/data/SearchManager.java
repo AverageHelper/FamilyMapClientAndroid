@@ -1,5 +1,6 @@
 package com.example.familymapclient.data;
 
+import com.example.familymapclient.auth.Auth;
 import com.example.familymapclient.auth.NonNullValueHandler;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import model.Person;
 public class SearchManager {
 	private final PersonCache personCache = PersonCache.shared();
 	private final EventCache eventCache = EventCache.shared();
+	private final Auth auth = Auth.shared();
 	
 	private @NonNull String previousQuery = "";
 	private @Nullable NonNullValueHandler<List<Object>> callback = null;
@@ -86,10 +88,19 @@ public class SearchManager {
 		
 		for (T value : original) {
 			if (value.getClass().equals(Event.class)) {
+				// Filter events
 				Event event = (Event) value;
 				if (eventMatchesUIFilter(event)) {
 					results.add(value);
 				}
+				
+			} else if (value.getClass().equals(Person.class)) {
+				// Filter persons
+				Person person = (Person) value;
+				if (personMatchesUIFilter(person)) {
+					results.add(value);
+				}
+				
 			} else {
 				results.add(value);
 			}
@@ -110,6 +121,24 @@ public class SearchManager {
 		}
 		return !person.getGender().equals(Gender.FEMALE) ||
 			filter.isFilterEnabled(FilterType.GENDER_FEMALE);
+	}
+	
+	private boolean personMatchesUIFilter(@NonNull Person person) {
+		if (filter == null) { return true; }
+		
+		String currentUserId = auth.getPersonID();
+		if (currentUserId == null) { return true; }
+		
+		Person currentUser = personCache.getValueWithID(currentUserId);
+		if (currentUser == null) { return false; }
+		
+		if (!filter.isFilterEnabled(FilterType.SIDE_FATHER) &&
+			personCache.personIsOnFathersSide(currentUser, person)) {
+			return false;
+		}
+		
+		return filter.isFilterEnabled(FilterType.SIDE_MOTHER) ||
+			!personCache.personIsOnMothersSide(currentUser, person);
 	}
 	
 }

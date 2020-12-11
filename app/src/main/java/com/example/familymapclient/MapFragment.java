@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -345,6 +346,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		updateMapContents();
 	}
 	
+	private @NonNull <T> List<T> listApplyingFilters(@NonNull Collection<T> original) {
+		List<T> results = new ArrayList<>();
+		
+		for (T value : original) {
+			if (value.getClass().equals(Event.class)) {
+				// Filter events
+				Event event = (Event) value;
+				if (eventMatchesUIFilter(event)) {
+					results.add(value);
+				}
+				
+			} else if (value.getClass().equals(Person.class)) {
+				// Filter persons
+				Person person = (Person) value;
+				if (personMatchesUIFilter(person)) {
+					results.add(value);
+				}
+				
+			} else {
+				results.add(value);
+			}
+		}
+		
+		return results;
+	}
+	
 	private boolean eventMatchesUIFilter(@NonNull Event event) {
 		UISettings settings = getUIPreferences();
 		if (settings == null) { return true; }
@@ -352,12 +379,36 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		String personID = event.getPersonID();
 		@Nullable Person person = personCache.getValueWithID(personID);
 		if (person == null) { return true; }
+		if (!personMatchesUIFilter(person)) {
+			return false;
+		}
 		
 		if (person.getGender().equals(Gender.MALE) && !settings.isFilterEnabled(FilterType.GENDER_MALE)) {
 			return false;
 		}
 		return !person.getGender().equals(Gender.FEMALE) ||
 			settings.isFilterEnabled(FilterType.GENDER_FEMALE);
+	}
+	
+	private boolean personMatchesUIFilter(@NonNull Person person) {
+		UISettings settings = getUIPreferences();
+		if (settings == null) { return true; }
+		
+		String currentUserId = auth.getPersonID();
+		if (currentUserId == null) { return true; }
+		
+		if (person.getId().equals(currentUserId)) { return true; }
+		
+		Person currentUser = personCache.getValueWithID(currentUserId);
+		if (currentUser == null) { return false; }
+		
+		if (!settings.isFilterEnabled(FilterType.SIDE_FATHER) &&
+			personCache.personIsOnFathersSide(currentUser, person)) {
+			return false;
+		}
+		
+		return settings.isFilterEnabled(FilterType.SIDE_MOTHER) ||
+			!personCache.personIsOnMothersSide(currentUser, person);
 	}
 	
 	
@@ -392,11 +443,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		map.clear();
 		
-		UISettings settings = getUIPreferences();
-		Set<Event> events = getDrawableEvents(settings);
+		Set<Event> events = getDrawableEvents();
 		
 		addEventMarkersToMap(events, map);
-		addLinesToMap(settings, map);
+		addLinesToMap(map);
 	}
 	
 	public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId, @NonNull Color color) {
@@ -437,7 +487,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
-	private void addLinesToMap(@Nullable UISettings settings, @NonNull GoogleMap map) {
+	private void addLinesToMap(@NonNull GoogleMap map) {
+		UISettings settings = getUIPreferences();
 		if (personForEvent == null || selectedEvent == null) {
 			return;
 		}
@@ -458,7 +509,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		String spouseId = subject.getSpouseID();
 		if (spouseId == null) { return; }
 		
-		List<Event> spouseEvents = eventCache.lifeEventsForPerson(spouseId);
+		List<Event> spouseEvents = listApplyingFilters(eventCache.lifeEventsForPerson(spouseId));
 		if (spouseEvents.isEmpty()) { return; }
 		Event birthEvent = spouseEvents.get(0);
 		
@@ -490,7 +541,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		
 		// Draw line to parents' birth events
 		for (String personId : parentsIDs) {
-			List<Event> fatherEvents = eventCache.lifeEventsForPerson(personId);
+			List<Event> fatherEvents = listApplyingFilters(eventCache.lifeEventsForPerson(personId));
 			if (fatherEvents.isEmpty()) { continue; }
 			
 			List<LatLng> locations = new ArrayList<>();
@@ -540,28 +591,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 		}
 	}
 	
-	private @NonNull Set<Event> getDrawableEvents(@Nullable UISettings settings) {
+	private @NonNull Set<Event> getDrawableEvents() {
 		Set<Event> result = new HashSet<>();
 		
 		for (Event event : eventCache.values()) {
-			if (event.getLatitude() == null || event.getLongitude() == null) {
-				continue;
-			}
-			
-			Person person = personCache.getValueWithID(event.getPersonID());
-			if (settings != null && person != null) {
-				// Check filters
-				if (person.getGender().equals(Gender.MALE) &&
-					!settings.isFilterEnabled(FilterType.GENDER_MALE)) {
-					continue;
-				}
-				
-				if (person.getGender().equals(Gender.FEMALE) &&
-					!settings.isFilterEnabled(FilterType.GENDER_FEMALE)) {
-					continue;
-				}
-			}
-			
+			if (event.getLatitude() == null || event.getLongitude() == null) { continue; }
+			if (!eventMatchesUIFilter(event)) { continue; }
 			result.add(event);
 		}
 		

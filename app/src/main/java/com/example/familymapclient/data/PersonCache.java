@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +19,7 @@ import model.Person;
 
 public class PersonCache extends IDMap<String, Person> {
 	private final Map<String, Set<Event>> personEvents;
+	private final Set<Person> mothersSide;
 	
 	private static @Nullable PersonCache instance = null;
 	public static @NonNull PersonCache shared() {
@@ -30,6 +32,7 @@ public class PersonCache extends IDMap<String, Person> {
 	private PersonCache() {
 		super();
 		this.personEvents = new HashMap<>();
+		this.mothersSide = new HashSet<>();
 	}
 	
 	
@@ -62,12 +65,19 @@ public class PersonCache extends IDMap<String, Person> {
 	 */
 	public void clear() {
 		personEvents.clear();
+		mothersSide.clear();
 		super.clear();
 	}
 	
 	@Override
 	public @Nullable Person removeValueWithID(@NonNull String id) {
 		personEvents.remove(id);
+		for (Person person : mothersSide) {
+			if (person.getId().equals(id)) {
+				mothersSide.remove(person);
+				break;
+			}
+		}
 		return super.removeValueWithID(id);
 	}
 	
@@ -143,5 +153,71 @@ public class PersonCache extends IDMap<String, Person> {
 			);
 		responder.start();
 		return responder;
+	}
+	
+	
+	
+	// ** Inspecting Persons
+	
+	/**
+	 * Recursively checks whether the given person is on the mother's side of the given root.
+	 *
+	 * Performs a DFS search of the <code>root</code> node's mother side. If <code>query</code> is
+	 * found, then this method returns <code>true</code>.
+	 */
+	private boolean personIsReallyOnMothersSide(@NonNull Person root, @NonNull Person query) {
+		if (root.getMotherID() == null) { return false; } // There is no mother
+		if (root.getMotherID().equals(query.getMotherID())) { return true; } // This is the mother
+		
+		Person mother = getValueWithID(root.getMotherID());
+		if (mother == null) { return false; } // Mother not downloaded
+		
+		// DFS the mother's subtree
+		Stack<Person> stack = new Stack<>();
+		stack.push(mother);
+		while (!stack.isEmpty()) {
+			Person vertex = stack.pop();
+			if (vertex.getId().equals(query.getId())) {
+				return true;
+			}
+			mother = getValueWithID(vertex.getMotherID());
+			Person father = getValueWithID(vertex.getFatherID());
+			if (mother != null) {
+				stack.push(mother);
+			}
+			if (father != null) {
+				stack.push(father);
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Checks whether the given person is on the mother's side of the given <code>root</code> person;
+	 * @param root The root of the family tree.
+	 * @param query The person whose side status should be determined.
+	 * @return whether the person is on the mother's side of the family.
+	 */
+	public boolean personIsOnMothersSide(@NonNull Person root, @NonNull Person query) {
+		if (mothersSide.contains(query)) {
+			return true;
+		}
+		
+		boolean result = personIsReallyOnMothersSide(root, query);
+		if (result) {
+			mothersSide.add(query);
+		}
+		return result;
+	}
+	
+	/**
+	 * Checks whether the given person is on the father's side of the given <code>root</code> person;
+	 * @param root The root of the family tree.
+	 * @param query The person whose side status should be determined.
+	 * @return whether the person is on the mother's side of the family.
+	 */
+	public boolean personIsOnFathersSide(@NonNull Person root, @NonNull Person query) {
+		return !personIsOnMothersSide(root, query);
 	}
 }

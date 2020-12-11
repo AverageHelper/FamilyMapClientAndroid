@@ -7,7 +7,6 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import model.Person;
 
@@ -16,7 +15,7 @@ import model.Person;
  * {@link PersonActivity#newIntent(Context, Person)} to initialize
  * the activity with its expected arguments.
  */
-public class PersonActivity extends AppCompatActivity {
+public class PersonActivity extends UIPreferencesActivity {
 	
 	public static final String ARG_PERSON_JSON = "person_json";
 	
